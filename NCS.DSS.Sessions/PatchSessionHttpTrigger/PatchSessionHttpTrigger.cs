@@ -6,13 +6,15 @@ using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger
 {
     public static class PatchSessionHttpTrigger
     {
-        [FunctionName("PatchSession")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Patch", Route = "customers/{customerId:guid}/sessions/{sessionid:guid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [FunctionName("PATCH")]
+        [ResponseType(typeof(Models.Session))]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Patch", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
         {
             log.Info("C# HTTP trigger function Patch Session processed a request.");
 

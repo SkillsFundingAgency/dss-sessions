@@ -6,13 +6,15 @@ using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.DeleteSessionHttpTrigger
 {
     public static class DeleteSessionHttpTrigger
     {
-        [FunctionName("DeleteSession")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "customers/{customerId:guid}/sessions/{sessionid:guid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [FunctionName("DELETE")]
+        [ResponseType(typeof(Models.Session))]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
         {
             log.Info("C# HTTP trigger function Delete Session processed a request.");
 

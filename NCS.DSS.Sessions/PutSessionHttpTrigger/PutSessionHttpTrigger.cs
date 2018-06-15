@@ -6,13 +6,15 @@ using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.PutSessionHttpTrigger
 {
     public static class PutSessionHttpTrigger
     {
-        [FunctionName("PutSession")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Put", Route = "customers/{customerId:guid}/sessions/{sessionid:guid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [FunctionName("PUT")]
+        [ResponseType(typeof(Models.Session))]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Put", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
         {
             log.Info("C# HTTP trigger function Put Session processed a request.");
 

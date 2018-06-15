@@ -6,13 +6,15 @@ using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger
 {
     public static class GetSessionByIdHttpTrigger
     {
-        [FunctionName("GetSessionById")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId:guid}/sessions/{sessionid:guid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [FunctionName("GETByID")]
+        [ResponseType(typeof(Models.Session))]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
         {
             log.Info("C# HTTP trigger function GetSessionById processed a request.");
 

@@ -6,13 +6,15 @@ using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger
 {
     public static class PostSessionHttpTrigger
     {
-        [FunctionName("PostSession")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Post", Route = "customers/{customerId:guid}/sessions/{sessionid:guid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [FunctionName("POST")]
+        [ResponseType(typeof(Models.Session))]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Post", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
         {
             log.Info("C# HTTP trigger function Post Session processed a request.");
 

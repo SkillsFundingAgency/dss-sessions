@@ -5,12 +5,14 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web.Http.Description;
 
 namespace NCS.DSS.Sessions.GetSessionHttpTrigger
 {
     public static class GetSessionHttpTrigger
     {
-        [FunctionName("GetSession")]
+        [FunctionName("GET")]
+        [ResponseType(typeof(Models.Session))]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/sessions/")]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function GetSession processed a request.");
