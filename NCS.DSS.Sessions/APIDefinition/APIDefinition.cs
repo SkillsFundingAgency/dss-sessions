@@ -15,18 +15,24 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace mAdcOW.AzureFunction.SwaggerDefinition
+namespace NCS.DSS.Diversity.APIDefinition
 {
-    public static class Swagger
+    public static class ApiDefinition
     {
         public const string APITitle = "Sessions";
         public const string APIDefinitionName = "API-Definition";
         public const string APIDefRoute = APITitle + "/" + APIDefinitionName;
         public const string APIDescription = "Basic details of a National Careers Service " + APITitle + " Resource";
 
+        public class Result<T>
+        {
+            public Result(T value) { Value = value; }
+            public T Value { get; set; }
+        }
+
         [FunctionName(APIDefinitionName)]
         [ResponseType(typeof(void))]
-        public static async Task<HttpResponseMessage> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get")]HttpRequestMessage req)
+        public static async Task<HttpResponseMessage> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = APIDefRoute)]HttpRequestMessage req)
         {
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -35,6 +41,7 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
             doc.info = new ExpandoObject();
             doc.info.title = APITitle;
             doc.info.version = "1.0.0";
+            doc.info.description = APIDescription;
             doc.host = req.RequestUri.Authority;
             doc.basePath = "/";
             doc.schemes = new[] { "https" };
@@ -42,6 +49,7 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
             {
                 doc.schemes = new[] { "http" };
             }
+
             doc.definitions = new ExpandoObject();
             doc.paths = GeneratePaths(assembly, doc);
             doc.securityDefinitions = GenerateSecurityDefinitions();
@@ -75,11 +83,14 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
             dynamic paths = new ExpandoObject();
             var methods = assembly.GetTypes()
                 .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttributes(typeof(FunctionNameAttribute), false).Length > 0)
-                .ToArray();
+                .Where(m => m.GetCustomAttributes(typeof(FunctionNameAttribute), false).Length > 0).ToArray();
             foreach (MethodInfo methodInfo in methods)
             {
-                string route = "/api/";
+                //hide any disabled methods
+                if (methodInfo.GetCustomAttributes(typeof(DisableAttribute), true).Any())
+                    continue;
+
+                var route = "/api/";
 
                 var functionAttr = (FunctionNameAttribute)methodInfo.GetCustomAttributes(typeof(FunctionNameAttribute), false)
                     .Single();
@@ -121,6 +132,8 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
                     operation.description = GetFunctionDescription(methodInfo, functionAttr.Name);
 
                     operation.responses = GenerateResponseParameterSignature(methodInfo, doc);
+                    operation.tags = new[] { APITitle };
+
                     dynamic keyQuery = new ExpandoObject();
                     keyQuery.apikeyQuery = new string[0];
                     operation.security = new ExpandoObject[] { keyQuery };
@@ -169,7 +182,7 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
         {
             dynamic responses = new ExpandoObject();
             dynamic responseDef = new ExpandoObject();
-            responseDef.description = "OK";
+
 
             var returnType = methodInfo.ReturnType;
             if (returnType.IsGenericType)
@@ -228,6 +241,7 @@ namespace mAdcOW.AzureFunction.SwaggerDefinition
                     }
                 }
             }
+            responseDef.description = "OK";
             AddToExpando(responses, "200", responseDef);
             return responses;
         }
