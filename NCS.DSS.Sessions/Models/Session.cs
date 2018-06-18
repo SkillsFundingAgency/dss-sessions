@@ -9,6 +9,7 @@ namespace NCS.DSS.Sessions.Models
 {
     public class Session
     {
+        [Required]
         public Guid SessionId { get; set; }
         public Guid InteractionId { get; set; }
         public DateTime DateandTimeOfSession { get; set; }

@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
+using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.PutSessionHttpTrigger
 {
@@ -14,7 +15,8 @@ namespace NCS.DSS.Sessions.PutSessionHttpTrigger
     {
         [FunctionName("PUT")]
         [ResponseType(typeof(Models.Session))]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Put", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [Display(Name = "Put", Description = "Ability to replace a session object for a given customer.")]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "Customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
         {
             log.Info("C# HTTP trigger function Put Session processed a request.");
 
@@ -26,7 +28,7 @@ namespace NCS.DSS.Sessions.PutSessionHttpTrigger
                         System.Text.Encoding.UTF8, "application/json")
                 };
             }
-            
+
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(JsonConvert.SerializeObject("Put Session successful for id: " + sessionId),

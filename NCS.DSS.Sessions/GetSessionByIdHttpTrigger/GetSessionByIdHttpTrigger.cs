@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
+using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger
 {
@@ -14,7 +15,8 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger
     {
         [FunctionName("GETByID")]
         [ResponseType(typeof(Models.Session))]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [Display(Name = "GetByID", Description = "Ability to get by ID; a session object for a given customer.")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
         {
             log.Info("C# HTTP trigger function GetSessionById processed a request.");
 

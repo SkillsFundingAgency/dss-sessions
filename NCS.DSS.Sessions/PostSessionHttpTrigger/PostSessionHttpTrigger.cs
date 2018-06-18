@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
+using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger
 {
@@ -14,7 +15,8 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger
     {
         [FunctionName("POST")]
         [ResponseType(typeof(Models.Session))]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "Post", Route = "customers/{customerId}/sessions/{sessionid}")]HttpRequestMessage req, TraceWriter log, string sessionId)
+        [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "Customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
         {
             log.Info("C# HTTP trigger function Post Session processed a request.");
 
