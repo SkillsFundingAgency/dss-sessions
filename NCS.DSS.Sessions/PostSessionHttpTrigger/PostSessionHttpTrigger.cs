@@ -8,12 +8,16 @@ using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
+using NCS.DSS.Sessions.Annotations;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger
 {
     public static class PostSessionHttpTrigger
     {
         [FunctionName("POST")]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Created, Description = "Session Added", ShowSchema = true)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Unable to Add Session", ShowSchema = false)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
         public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "Customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)

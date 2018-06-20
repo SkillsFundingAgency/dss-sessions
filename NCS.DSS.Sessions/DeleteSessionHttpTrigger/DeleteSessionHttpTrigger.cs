@@ -8,12 +8,16 @@ using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
+using NCS.DSS.Sessions.Annotations;
 
 namespace NCS.DSS.Sessions.DeleteSessionHttpTrigger
 {
     public static class DeleteSessionHttpTrigger
     {
         [FunctionName("DELETE")]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Created, Description = "Session Deleted", ShowSchema = true)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Unable to Delete Session", ShowSchema = false)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Delete", Description = "Ability to delete a session object for a given customer.")]
         public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)

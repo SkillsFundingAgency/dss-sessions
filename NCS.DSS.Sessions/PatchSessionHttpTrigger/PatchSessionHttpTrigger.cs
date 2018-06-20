@@ -8,12 +8,16 @@ using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
+using NCS.DSS.Sessions.Annotations;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger
 {
     public static class PatchSessionHttpTrigger
     {
         [FunctionName("PATCH")]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Created, Description = "Session Updated", ShowSchema = true)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Unable to Update Session", ShowSchema = false)]
+        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
         public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "Customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
