@@ -19,7 +19,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger
         [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Get", Description = "Ability to get a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Customers/sessions/")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/sessions/")]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function GetSession processed a request.");
 
