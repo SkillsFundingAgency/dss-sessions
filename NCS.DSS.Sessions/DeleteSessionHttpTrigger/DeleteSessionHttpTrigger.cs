@@ -15,11 +15,14 @@ namespace NCS.DSS.Sessions.DeleteSessionHttpTrigger
     public static class DeleteSessionHttpTrigger
     {
         [FunctionName("DELETE")]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Created, Description = "Session Deleted", ShowSchema = true)]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Unable to Delete Session", ShowSchema = false)]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Deleted", ShowSchema = true)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Delete request is malformed", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Delete", Description = "Ability to delete a session object for a given customer.")]
+        [Disable]
         public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
 
         {

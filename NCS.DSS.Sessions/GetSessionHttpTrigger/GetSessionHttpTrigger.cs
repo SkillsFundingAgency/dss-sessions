@@ -14,9 +14,11 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger
     public static class GetSessionHttpTrigger
     {
         [FunctionName("GET")]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Created, Description = "Sessions Retrieved", ShowSchema = true)]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Unable to Retrieve Sessions", ShowSchema = false)]
-        [SessionsResponse(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Forbidden", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Retrieved", ShowSchema = true)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Get request is malformed", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Get", Description = "Ability to get a session object for a given customer.")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/sessions/")]HttpRequestMessage req, TraceWriter log)

@@ -245,17 +245,17 @@ namespace NCS.DSS.Sessions.APIDefinition
             }
 
             // automatically get data(http code, description and show schema) from the new custom response class
-            var responseCodes = methodInfo.GetCustomAttributes(typeof(SessionsResponse), false);
+            var responseCodes = methodInfo.GetCustomAttributes(typeof(Response), false);
 
             foreach (var response in responseCodes)
             {
-                var sessionsResponse = (SessionsResponse)response;
+                var SessionsResponse = (Response)response;
 
-                if (!sessionsResponse.ShowSchema)
+                if (!SessionsResponse.ShowSchema)
                     responseDef = new ExpandoObject();
 
-                responseDef.description = sessionsResponse.Description;
-                AddToExpando(responses, sessionsResponse.HttpStatusCode.ToString(), responseDef);
+                responseDef.description = SessionsResponse.Description;
+                AddToExpando(responses, SessionsResponse.HttpStatusCode.ToString(), responseDef);
             }
 
             return responses;
@@ -370,8 +370,11 @@ namespace NCS.DSS.Sessions.APIDefinition
                 dynamic propDef = new ExpandoObject();
                 propDef.description = GetPropertyDescription(property);
 
-                var stringAttribute = (StringLengthAttribute)property.GetCustomAttributes(typeof(StringLengthAttribute), false).FirstOrDefault();
+                var exampleAttribute = (Example)property.GetCustomAttributes(typeof(Example), false).FirstOrDefault();
+                if (exampleAttribute != null)
+                    propDef.example = exampleAttribute.Description;
 
+                var stringAttribute = (StringLengthAttribute)property.GetCustomAttributes(typeof(StringLengthAttribute), false).FirstOrDefault();
                 if (stringAttribute != null)
                 {
                     propDef.maxLength = stringAttribute.MaximumLength;
@@ -379,11 +382,8 @@ namespace NCS.DSS.Sessions.APIDefinition
                 }
 
                 var regexAttribute = (RegularExpressionAttribute)property.GetCustomAttributes(typeof(RegularExpressionAttribute), false).FirstOrDefault();
-
                 if (regexAttribute != null)
-                {
                     propDef.pattern = regexAttribute.Pattern;
-                }
 
                 SetParameterType(property.PropertyType, propDef, definitions);
                 AddToExpando(objDef.properties, property.Name, propDef);
@@ -473,7 +473,7 @@ namespace NCS.DSS.Sessions.APIDefinition
                     if (string.IsNullOrEmpty(description))
                         description = item.ToString();
 
-                    enumValues.Add(description);
+                    enumValues.Add(Convert.ToInt32(item) + " - " + description);
                 }
 
                 opParam.@enum = enumValues.ToArray();
