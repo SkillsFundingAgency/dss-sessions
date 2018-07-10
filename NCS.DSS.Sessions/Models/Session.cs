@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using NCS.DSS.Sessions.ReferenceData;
 using NCS.DSS.Sessions.Annotations;
@@ -11,9 +7,12 @@ namespace NCS.DSS.Sessions.Models
 {
     public class Session
     {
+        private const string PostcodeRegEx = @"([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})";
+
         [Required]
         [Example(Description = "b8592ff8-af97-49ad-9fb2-e5c3c717fd85")]
         [Display(Description = "Unique identifier of the appointment record")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
         public Guid SessionId { get; set; }
 
         [Example(Description = "b8592ff8-af97-49ad-9fb2-e5c3c717fd85")]
@@ -25,9 +24,7 @@ namespace NCS.DSS.Sessions.Models
         public DateTime DateandTimeOfSession { get; set; }
 
         [Display(Description = "PostCode of the session or appointment venue where applicable")]
-        [RegularExpression(@"([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A - Za - z][0 - 9][A - Za - z]) | 
-                                            ([A - Za - z][A - Ha - hJ - Yj - y][0 - 9]?[A - Za - z]))))\\s?[0-9] [A-Za-z]{2})", 
-                                            ErrorMessage = "Postcode must be in valid UK format as specified in the UK Government Data Standard.")]
+        [RegularExpression(PostcodeRegEx, ErrorMessage = "Postcode must be in valid UK format as specified in the UK Government Data Standard.")]
         [StringLength(10)]
         public string VenuePostCode { get; set; }
 
