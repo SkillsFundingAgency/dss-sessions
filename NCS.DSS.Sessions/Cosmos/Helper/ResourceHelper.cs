@@ -12,5 +12,13 @@ namespace NCS.DSS.Sessions.Cosmos.Helper
 
             return doesCustomerExist;
         }
+
+        public bool DoesInteractionExist(Guid interactionId)
+        {
+            var documentDbProvider = new DocumentDBProvider();
+            var doesInteractionExist = documentDbProvider.DoesInteractionResourceExist(interactionId);
+
+            return doesInteractionExist;
+        }
     }
 }

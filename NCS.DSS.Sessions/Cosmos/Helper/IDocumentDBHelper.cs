@@ -7,5 +7,6 @@ namespace NCS.DSS.Sessions.Cosmos.Helper
         Uri CreateDocumentCollectionUri();
         Uri CreateDocumentUri(Guid sessionId);
         Uri CreateCustomerDocumentCollectionUri();
+        Uri CreateInteractionDocumentCollectionUri();
     }
 }

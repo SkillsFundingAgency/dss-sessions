@@ -33,9 +33,21 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
 
             var customerQuery = client.CreateDocumentQuery<Document>(collectionUri, new FeedOptions() { MaxItemCount = 1 });
             return customerQuery.Where(x => x.Id == customerId.ToString()).Select(x => x.Id).AsEnumerable().Any();
-
         }
-        
+
+        public bool DoesInteractionResourceExist(Guid interactionId)
+        {
+            var collectionUri = _documentDbHelper.CreateInteractionDocumentCollectionUri();
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            if (client == null)
+                return false;
+
+            var interactionQuery = client.CreateDocumentQuery<Document>(collectionUri, new FeedOptions() { MaxItemCount = 1 });
+            return interactionQuery.Where(x => x.Id == interactionId.ToString()).Select(x => x.Id).AsEnumerable().Any();
+        }
+
         public async Task<ResourceResponse<Document>> CreateSessionAsync(Session session)
         {
 
