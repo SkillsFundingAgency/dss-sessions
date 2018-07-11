@@ -14,5 +14,6 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
         Task<List<Session>> GetSessionsForCustomerAsync(Guid customerId);
         Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId);
         Task<ResourceResponse<Document>> CreateSessionAsync(Session session);
+        Task<ResourceResponse<Document>> UpdateSessionAsync(Session session);
     }
 }

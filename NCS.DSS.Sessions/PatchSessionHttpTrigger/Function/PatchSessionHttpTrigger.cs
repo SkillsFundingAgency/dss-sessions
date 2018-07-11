@@ -4,61 +4,64 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
+using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 using NCS.DSS.Sessions.Annotations;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Ioc;
 using NCS.DSS.Sessions.Models;
-using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
+using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 
-namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
+namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 {
-    public static class PostSessionHttpTrigger
+    public static class PatchSessionHttpTrigger
     {
-        [FunctionName("POST")]
-        [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Added", ShowSchema = true)]
+        [FunctionName("PATCH")]
+        [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Patched", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
-        [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Post request is malformed", ShowSchema = false)]
+        [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Patch request is malformed", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
-        [Response(HttpStatusCode = 422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
-        [ResponseType(typeof(Session))]
-        [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId,
+        [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
+        [ResponseType(typeof(Models.Session))]
+        [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId, string sessionId,
             [Inject]IResourceHelper resourceHelper,
             [Inject]IHttpRequestMessageHelper httpRequestMessageHelper,
             [Inject]IValidate validate,
-            [Inject]IPostSessionHttpTriggerService sessionPostService)
+            [Inject]IPatchSessionHttpTriggerService sessionPatchService)
         {
-            log.Info("C# HTTP trigger function Post Session processed a request.");
+            log.Info("C# HTTP trigger function Patch Session processed a request.");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
                 return HttpResponseMessageHelper.BadRequest(customerGuid);
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
                 return HttpResponseMessageHelper.BadRequest(interactionGuid);
-            
-            Session sessionRequest;
+
+            if (!Guid.TryParse(sessionId, out var sessionGuid))
+                return HttpResponseMessageHelper.BadRequest(sessionGuid);
+
+            SessionPatch sessionPatchRequest;
 
             try
             {
-                sessionRequest = await httpRequestMessageHelper.GetSessionFromRequest<Session>(req);
+                sessionPatchRequest = await httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(req);
             }
             catch (JsonSerializationException ex)
             {
                 return HttpResponseMessageHelper.UnprocessableEntity(ex);
             }
 
-            if (sessionRequest == null)
+            if (sessionPatchRequest == null)
                 return HttpResponseMessageHelper.UnprocessableEntity(req);
 
-            var errors = validate.ValidateResource(sessionRequest);
+            var errors = validate.ValidateResource(sessionPatchRequest);
 
             if (errors != null && errors.Any())
                 return HttpResponseMessageHelper.UnprocessableEntity(errors);
@@ -73,11 +76,16 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             if (!doesInteractionExist)
                 return HttpResponseMessageHelper.NoContent(interactionGuid);
 
-            var session = await sessionPostService.CreateAsync(sessionRequest);
+            var session = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
-            return session == null
-                ? HttpResponseMessageHelper.BadRequest(customerGuid)
-                : HttpResponseMessageHelper.Created(session);
+            if (session == null)
+                return HttpResponseMessageHelper.NoContent(sessionGuid);
+
+            var updatedSession = await sessionPatchService.UpdateAsync(session, sessionPatchRequest);
+
+            return updatedSession == null ?
+                HttpResponseMessageHelper.BadRequest(sessionGuid) :
+                HttpResponseMessageHelper.Ok(updatedSession);
         }
 
     }

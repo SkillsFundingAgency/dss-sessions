@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 
-namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
+namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
 {
     public class PostSessionHttpTriggerService : IPostSessionHttpTriggerService
     {

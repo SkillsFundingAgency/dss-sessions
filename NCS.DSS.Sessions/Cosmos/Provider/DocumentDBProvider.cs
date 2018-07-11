@@ -71,22 +71,6 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
             return sessions.Any() ? sessions : null;
         }
 
-        public async Task<ResourceResponse<Document>> CreateSessionAsync(Session session)
-        {
-
-            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
-
-            var client = _databaseClient.CreateDocumentClient();
-
-            if (client == null)
-                return null;
-
-            var response = await client.CreateDocumentAsync(collectionUri, session);
-
-            return response;
-
-        }
-
         public async Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
         {
             var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
@@ -104,6 +88,37 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
             var sessions = await sessionForCustomerQuery.ExecuteNextAsync<Session>();
 
             return sessions?.FirstOrDefault();
+        }
+
+
+        public async Task<ResourceResponse<Document>> CreateSessionAsync(Session session)
+        {
+
+            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            if (client == null)
+                return null;
+
+            var response = await client.CreateDocumentAsync(collectionUri, session);
+
+            return response;
+
+        }
+
+        public async Task<ResourceResponse<Document>> UpdateSessionAsync(Session session)
+        {
+            var documentUri = _documentDbHelper.CreateDocumentUri(session.SessionId.GetValueOrDefault());
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            if (client == null)
+                return null;
+
+            var response = await client.ReplaceDocumentAsync(documentUri, session);
+
+            return response;
         }
     }
 }
