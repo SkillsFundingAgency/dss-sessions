@@ -11,6 +11,8 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
     {
         bool DoesCustomerResourceExist(Guid customerId);
         bool DoesInteractionResourceExist(Guid interactionId);
+        Task<List<Session>> GetSessionsForCustomerAsync(Guid customerId);
+        Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId);
         Task<ResourceResponse<Document>> CreateSessionAsync(Session session);
     }
 }

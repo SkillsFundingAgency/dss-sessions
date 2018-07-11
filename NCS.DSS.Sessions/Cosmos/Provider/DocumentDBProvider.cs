@@ -48,6 +48,29 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
             return interactionQuery.Where(x => x.Id == interactionId.ToString()).Select(x => x.Id).AsEnumerable().Any();
         }
 
+        public async Task<List<Session>> GetSessionsForCustomerAsync(Guid customerId)
+        {
+            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            if (client == null)
+                return null;
+
+            var sessionsQuery = client.CreateDocumentQuery<Session>(collectionUri)
+                .Where(so => so.CustomerId == customerId).AsDocumentQuery();
+
+            var sessions = new List<Session>();
+
+            while (sessionsQuery.HasMoreResults)
+            {
+                var response = await sessionsQuery.ExecuteNextAsync<Session>();
+                sessions.AddRange(response);
+            }
+
+            return sessions.Any() ? sessions : null;
+        }
+
         public async Task<ResourceResponse<Document>> CreateSessionAsync(Session session)
         {
 
@@ -64,5 +87,23 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
 
         }
 
+        public async Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
+        {
+            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            var sessionForCustomerQuery = client
+                ?.CreateDocumentQuery<Session>(collectionUri, new FeedOptions { MaxItemCount = 1 })
+                .Where(x => x.CustomerId == customerId && x.SessionId == sessionId)
+                .AsDocumentQuery();
+
+            if (sessionForCustomerQuery == null)
+                return null;
+
+            var sessions = await sessionForCustomerQuery.ExecuteNextAsync<Session>();
+
+            return sessions?.FirstOrDefault();
+        }
     }
 }
