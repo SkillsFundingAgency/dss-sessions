@@ -28,7 +28,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
-        [ResponseType(typeof(Models.Session))]
+        [ResponseType(typeof(Session))]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId, string sessionId,
             [Inject]IResourceHelper resourceHelper,

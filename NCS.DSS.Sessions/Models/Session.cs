@@ -9,7 +9,6 @@ namespace NCS.DSS.Sessions.Models
     {
         private const string PostcodeRegEx = @"([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})";
 
-        [Required]
         [Example(Description = "b8592ff8-af97-49ad-9fb2-e5c3c717fd85")]
         [Display(Description = "Unique identifier of the appointment record")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
@@ -23,11 +22,6 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "b8592ff8-af97-49ad-9fb2-e5c3c717fd85")]
         [Display(Description = "Unique identifier to the related interaction resource")]
         public Guid InteractionId { get; set; }
-
-        [Required]
-        [Display(Description = "Unique identifier of a customer.")]
-        [Example(Description = "2730af9c-fc34-4c2b-a905-c4b584b0f379")]
-        public Guid CustomerId { get; set; }
 
         [Display(Description = "Date and time of the session with the customer")]
         [Example(Description = "2018-06-21T14:45:00")]

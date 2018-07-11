@@ -5,7 +5,7 @@ using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
-using NCS.DSS.Sessions.PostSessionHttpTrigger.Function;
+using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 
 

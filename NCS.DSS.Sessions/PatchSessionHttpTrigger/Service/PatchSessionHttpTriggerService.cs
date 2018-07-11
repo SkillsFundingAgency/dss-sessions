@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
