@@ -67,8 +67,23 @@
             {
               "name": "Key",
               "value": "[parameters('cosmosDbKey')]"
+            },
+            {
+              "name": "CustomerDatabaseId",
+              "value": "customers"
+            },
+            {
+              "name": "CustomerCollectionId",
+              "value": "customers"
+            },
+            {
+              "name": "InteractionDatabaseId",
+              "value": "interactions"
+            },
+            {
+              "name": "InteractionCollectionId",
+              "value": "interactions"
             }
-
           ]
         }
       }
