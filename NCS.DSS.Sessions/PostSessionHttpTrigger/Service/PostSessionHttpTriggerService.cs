@@ -16,6 +16,9 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
             var sessionId = Guid.NewGuid();
             session.SessionId = sessionId;
 
+            if (!session.LastModifiedDate.HasValue)
+                session.LastModifiedDate = DateTime.Now;
+
             var documentDbProvider = new DocumentDBProvider();
 
             var response = await documentDbProvider.CreateSessionAsync(session);

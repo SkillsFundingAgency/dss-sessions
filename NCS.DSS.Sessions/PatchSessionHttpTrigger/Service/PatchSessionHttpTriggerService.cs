@@ -13,6 +13,9 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
             if (session == null)
                 return null;
 
+            if (!sessionPatch.LastModifiedDate.HasValue)
+                sessionPatch.LastModifiedDate = DateTime.Now;
+
             session.Patch(sessionPatch);
 
             var documentDbProvider = new DocumentDBProvider();
