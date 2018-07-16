@@ -53,12 +53,23 @@ namespace NCS.DSS.Sessions.Models
             if(sessionPatch == null)
                 return;
 
-            DateandTimeOfSession = sessionPatch.DateandTimeOfSession;
-            VenuePostCode = sessionPatch.VenuePostCode;
-            SessionAttended = sessionPatch.SessionAttended;
-            ReasonForNonAttendanceId = sessionPatch.ReasonForNonAttendanceId;
-            LastModifiedDate = sessionPatch.LastModifiedDate;
-            LastModifiedTouchpointId = sessionPatch.LastModifiedTouchpointId;
+            if(sessionPatch.DateandTimeOfSession.HasValue)
+                DateandTimeOfSession = sessionPatch.DateandTimeOfSession;
+
+            if (!string.IsNullOrEmpty(sessionPatch.VenuePostCode))
+                VenuePostCode = sessionPatch.VenuePostCode;
+
+            if (sessionPatch.SessionAttended.HasValue)
+                SessionAttended = sessionPatch.SessionAttended;
+
+            if (sessionPatch.ReasonForNonAttendanceId.HasValue)
+                ReasonForNonAttendanceId = sessionPatch.ReasonForNonAttendanceId.Value;
+
+            if (sessionPatch.LastModifiedDate.HasValue)
+                LastModifiedDate = sessionPatch.LastModifiedDate;
+
+            if (sessionPatch.LastModifiedTouchpointId.HasValue)
+                LastModifiedTouchpointId = sessionPatch.LastModifiedTouchpointId;
 
         }
     }
