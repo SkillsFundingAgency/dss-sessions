@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Extensions;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
@@ -21,7 +20,7 @@ namespace NCS.DSS.Sessions.Tests
         private const string ValidCustomerId = "7E467BDB-213F-407A-B86A-1954053D3C24";
         private const string ValidInteractionId = "1e1a555c-9633-4e12-ab28-09ed60d51cb3";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
-        private TraceWriter _log;
+        private ILogger _log;
         private HttpRequestMessage _request;
         private IResourceHelper _resourceHelper;
         private IValidate _validate;
@@ -42,7 +41,8 @@ namespace NCS.DSS.Sessions.Tests
                             $"Interactions/aa57e39e-4469-4c79-a9e9-9cb4ef410382/" +
                             $"Sessions")
             };
-            _log = new TraceMonitor();
+
+            _log = Substitute.For<ILogger>();
             _resourceHelper = Substitute.For<IResourceHelper>();
             _httpRequestMessageHelper = Substitute.For<IHttpRequestMessageHelper>();
             _validate = Substitute.For<IValidate>();

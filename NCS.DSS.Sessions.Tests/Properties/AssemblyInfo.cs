@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("NCS.DSS.Sessions.Tests")]
@@ -13,7 +12,7 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 
-[assembly: Guid("a1b6c571-c896-439e-94e5-17bb49d9dd92")]
+[assembly: Guid("d3ba7f93-66c7-444c-ac4b-db5b78e850e3")]
 
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
