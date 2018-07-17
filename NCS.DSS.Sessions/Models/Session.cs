@@ -19,10 +19,12 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "2730af9c-fc34-4c2b-a905-c4b584b0f379")]
         public Guid? CustomerId { get; set; }
 
+        [Required]
         [Example(Description = "b8592ff8-af97-49ad-9fb2-e5c3c717fd85")]
         [Display(Description = "Unique identifier to the related interaction resource")]
         public Guid? InteractionId { get; set; }
 
+        [Required]
         [Display(Description = "Date and time of the session with the customer")]
         [Example(Description = "2018-06-21T14:45:00")]
         public DateTime? DateandTimeOfSession { get; set; }
