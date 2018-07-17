@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
 using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Annotations;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
@@ -25,11 +25,11 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ResponseType(typeof(Models.Session))]
         [Display(Name = "Get", Description = "Ability to get a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId,
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions")]HttpRequestMessage req, ILogger log, string customerId, string interactionId,
             [Inject]IResourceHelper resourceHelper,
             [Inject]IGetSessionHttpTriggerService sessionGetService)
         {
-            log.Info("C# HTTP trigger function GetSession processed a request.");
+            log.LogInformation("C# HTTP trigger function GetSession processed a request.");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
                 return HttpResponseMessageHelper.BadRequest(customerGuid);

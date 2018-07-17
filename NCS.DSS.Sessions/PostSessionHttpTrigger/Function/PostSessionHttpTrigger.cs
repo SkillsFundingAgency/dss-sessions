@@ -1,6 +1,5 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
@@ -9,6 +8,7 @@ using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Annotations;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Helpers;
@@ -30,13 +30,13 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         [Response(HttpStatusCode = 422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ResponseType(typeof(Session))]
         [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId,
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")]HttpRequestMessage req, ILogger log, string customerId, string interactionId,
             [Inject]IResourceHelper resourceHelper,
             [Inject]IHttpRequestMessageHelper httpRequestMessageHelper,
             [Inject]IValidate validate,
             [Inject]IPostSessionHttpTriggerService sessionPostService)
         {
-            log.Info("C# HTTP trigger function Post Session processed a request.");
+            log.LogInformation("C# HTTP trigger function Post Session processed a request.");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
                 return HttpResponseMessageHelper.BadRequest(customerGuid);

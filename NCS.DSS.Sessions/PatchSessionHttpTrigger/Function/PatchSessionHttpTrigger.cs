@@ -1,6 +1,5 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
@@ -9,6 +8,7 @@ using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Annotations;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Helpers;
@@ -30,13 +30,13 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ResponseType(typeof(Session))]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string interactionId, string sessionId,
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequestMessage req, ILogger log, string customerId, string interactionId, string sessionId,
             [Inject]IResourceHelper resourceHelper,
             [Inject]IHttpRequestMessageHelper httpRequestMessageHelper,
             [Inject]IValidate validate,
             [Inject]IPatchSessionHttpTriggerService sessionPatchService)
         {
-            log.Info("C# HTTP trigger function Patch Session processed a request.");
+            log.LogInformation("C# HTTP trigger function Patch Session processed a request.");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
                 return HttpResponseMessageHelper.BadRequest(customerGuid);
