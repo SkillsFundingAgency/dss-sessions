@@ -50,7 +50,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
+        public async Task PostSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
         {
             // Act
             var result = await RunFunction(InValidId, ValidInteractionId);
@@ -61,7 +61,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
+        public async Task PostSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
         {
             // Act
             var result = await RunFunction(ValidCustomerId, InValidId);
@@ -130,6 +130,23 @@ namespace NCS.DSS.Sessions.Tests
 
         [Test]
         public async Task PostSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenUnableToCreateSessionRecord()
+        {
+            _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
+
+            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
+            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+
+            _postSessionHttpTriggerService.CreateAsync(Arg.Any<Models.Session>()).Returns(Task.FromResult<Models.Session>(null).Result);
+
+            var result = await RunFunction(ValidCustomerId, ValidInteractionId);
+
+            // Assert
+            Assert.IsInstanceOf<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+        }
+
+        [Test]
+        public async Task PostSessionHttpTrigger_ReturnsStatusCodeCreated_WhenRequestIsInValid()
         {
             _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
 

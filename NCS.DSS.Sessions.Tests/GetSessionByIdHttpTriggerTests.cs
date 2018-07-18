@@ -44,7 +44,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
         {
             // Act
             var result = await RunFunction(InValidId, ValidInteractionId, ValidSessionId);
@@ -55,7 +55,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
         {
             // Act
             var result = await RunFunction(ValidCustomerId, InValidId, ValidSessionId);
@@ -66,7 +66,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenSessionIdIsInvalid()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeBadRequest_WhenSessionIdIsInvalid()
         {
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, InValidId);
@@ -77,7 +77,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenCustomerDoesNotExist()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeNoContent_WhenCustomerDoesNotExist()
         {
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(false);
 
@@ -90,7 +90,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
         {
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
 
@@ -105,7 +105,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeOk_WhenSessionDoesNotExist()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeOk_WhenSessionDoesNotExist()
         {
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
             _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
@@ -121,7 +121,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeOk_WhenSessionExists()
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeOk_WhenSessionExists()
         {
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
             _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);

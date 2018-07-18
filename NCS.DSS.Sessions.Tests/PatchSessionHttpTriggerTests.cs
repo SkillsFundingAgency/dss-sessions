@@ -53,7 +53,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
         {
             // Act
             var result = await RunFunction(InValidId, ValidInteractionId, ValidSessionId);
@@ -64,7 +64,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
         {
             // Act
             var result = await RunFunction(ValidCustomerId, InValidId, ValidSessionId);
@@ -75,7 +75,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenSessionIdIsInvalid()
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenSessionIdIsInvalid()
         {
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, InValidId);
@@ -145,22 +145,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenCustomerDoesNotExist()
-        {
-            _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
-
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(false);
-
-            // Act
-            var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
-
-            // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
-        }
-
-        [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
         {
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
@@ -176,7 +161,7 @@ namespace NCS.DSS.Sessions.Tests
         }
 
         [Test]
-        public async Task GetSessionHttpTrigger_ReturnsStatusCodeOk_WhenSessionDoesNotExist()
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeOk_WhenSessionDoesNotExist()
         {
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
@@ -204,6 +189,25 @@ namespace NCS.DSS.Sessions.Tests
             _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
             _patchSessionHttpTriggerService.UpdateAsync(Arg.Any<Session>(), Arg.Any<SessionPatch>()).Returns(Task.FromResult<Session>(null).Result);
+
+            var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
+
+            // Assert
+            Assert.IsInstanceOf<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+        }
+
+        [Test]
+        public async Task PatchSessionHttpTrigger_ReturnsStatusCodeOK_WhenRequestIsNotValid()
+        {
+            _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
+
+            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
+            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
+
+            _patchSessionHttpTriggerService.UpdateAsync(Arg.Any<Session>(), Arg.Any<SessionPatch>()).Returns(Task.FromResult<Models.Session>(null).Result);
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
 
