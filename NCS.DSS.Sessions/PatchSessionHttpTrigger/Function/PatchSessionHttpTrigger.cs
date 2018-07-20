@@ -53,7 +53,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             {
                 sessionPatchRequest = await httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(req);
             }
-            catch (JsonSerializationException ex)
+            catch (JsonException ex)
             {
                 return HttpResponseMessageHelper.UnprocessableEntity(ex);
             }

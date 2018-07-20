@@ -50,7 +50,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             {
                 sessionRequest = await httpRequestMessageHelper.GetSessionFromRequest<Session>(req);
             }
-            catch (JsonSerializationException ex)
+            catch (JsonException ex)
             {
                 return HttpResponseMessageHelper.UnprocessableEntity(ex);
             }
