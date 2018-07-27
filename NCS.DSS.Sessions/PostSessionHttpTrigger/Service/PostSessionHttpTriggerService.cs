@@ -13,11 +13,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
             if (session == null)
                 return null;
 
-            var sessionId = Guid.NewGuid();
-            session.SessionId = sessionId;
-
-            if (!session.LastModifiedDate.HasValue)
-                session.LastModifiedDate = DateTime.Now;
+            session.SetDefaultValues();
 
             var documentDbProvider = new DocumentDBProvider();
 
