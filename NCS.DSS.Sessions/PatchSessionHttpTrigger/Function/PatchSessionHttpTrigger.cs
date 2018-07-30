@@ -68,6 +68,8 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (sessionPatchRequest == null)
                 return HttpResponseMessageHelper.UnprocessableEntity(req);
 
+            sessionPatchRequest.LastModifiedTouchpointId = touchpointId;
+
             var errors = validate.ValidateResource(sessionPatchRequest);
 
             if (errors != null && errors.Any())
