@@ -55,7 +55,7 @@ namespace NCS.DSS.Sessions.Models
              SessionId = Guid.NewGuid();
 
             if (!LastModifiedDate.HasValue)
-                LastModifiedDate = DateTime.Now;
+                LastModifiedDate = DateTime.UtcNow;
 
             if (ReasonForNonAttendance == null)
                 ReasonForNonAttendance = ReferenceData.ReasonForNonAttendance.NotKnown;

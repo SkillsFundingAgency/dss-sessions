@@ -36,7 +36,14 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             [Inject]IValidate validate,
             [Inject]IPostSessionHttpTriggerService sessionPostService)
         {
-            log.LogInformation("C# HTTP trigger function Post Session processed a request.");
+            var touchpointId = httpRequestMessageHelper.GetTouchpointId(req);
+            if (touchpointId == null)
+            {
+                log.LogInformation("Unable to locate 'APIM-TouchpointId' in request header.");
+                return HttpResponseMessageHelper.BadRequest();
+            }
+
+            log.LogInformation("C# HTTP trigger function Post Session processed a request. " + touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
                 return HttpResponseMessageHelper.BadRequest(customerGuid);

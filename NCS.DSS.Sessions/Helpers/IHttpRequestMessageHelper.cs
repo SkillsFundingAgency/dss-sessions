@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Helpers
@@ -6,5 +7,6 @@ namespace NCS.DSS.Sessions.Helpers
     public interface IHttpRequestMessageHelper
     {
         Task<T> GetSessionFromRequest<T>(HttpRequestMessage req);
+        Guid? GetTouchpointId(HttpRequestMessage req);
     }
 }
