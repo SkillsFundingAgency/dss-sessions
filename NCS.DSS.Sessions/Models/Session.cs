@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using NCS.DSS.Sessions.ReferenceData;
 using NCS.DSS.Sessions.Annotations;
