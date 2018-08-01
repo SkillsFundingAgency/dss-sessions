@@ -4,7 +4,6 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
-using System.Threading.Tasks;
 using System;
 using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
