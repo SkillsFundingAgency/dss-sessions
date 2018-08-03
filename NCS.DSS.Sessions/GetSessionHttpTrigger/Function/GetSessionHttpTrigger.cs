@@ -59,7 +59,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
 
             return sessions == null ?
                 HttpResponseMessageHelper.NoContent(interactionGuid) :
-                HttpResponseMessageHelper.Ok(sessions);
+                HttpResponseMessageHelper.Ok(JsonHelper.SerializeObjects(sessions));
         }
 
     }

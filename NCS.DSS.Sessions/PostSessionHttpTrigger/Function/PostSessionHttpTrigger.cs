@@ -86,7 +86,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             return session == null
                 ? HttpResponseMessageHelper.BadRequest(customerGuid)
-                : HttpResponseMessageHelper.Created(session);
+                : HttpResponseMessageHelper.Created(JsonHelper.SerializeObject(session));
         }
 
     }
