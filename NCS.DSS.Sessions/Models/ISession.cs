@@ -10,7 +10,7 @@ namespace NCS.DSS.Sessions.Models
         bool? SessionAttended { get; set; }
         ReasonForNonAttendance? ReasonForNonAttendance { get; set; }
         DateTime? LastModifiedDate { get; set; }
-        Guid? LastModifiedTouchpointId { get; set; }
+        string LastModifiedTouchpointId { get; set; }
 
         void SetDefaultValues();
     }

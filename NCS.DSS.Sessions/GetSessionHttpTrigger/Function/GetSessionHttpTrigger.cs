@@ -31,9 +31,9 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
             [Inject]IGetSessionHttpTriggerService sessionGetService)
         {
             var touchpointId = httpRequestMessageHelper.GetTouchpointId(req);
-            if (touchpointId == null)
+            if (string.IsNullOrEmpty(touchpointId))
             {
-                log.LogInformation("Unable to locate 'APIM-TouchpointId' in request header.");
+                log.LogInformation("Unable to locate 'TouchpointId' in request header.");
                 return HttpResponseMessageHelper.BadRequest();
             }
 
