@@ -65,7 +65,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             if (sessionRequest == null)
                 return HttpResponseMessageHelper.UnprocessableEntity(req);
 
-            sessionRequest.LastModifiedTouchpointId = touchpointId;
+            sessionRequest.SetIds(customerGuid, interactionGuid, touchpointId);
 
             var errors = validate.ValidateResource(sessionRequest);
 
