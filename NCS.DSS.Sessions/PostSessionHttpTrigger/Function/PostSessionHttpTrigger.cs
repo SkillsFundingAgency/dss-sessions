@@ -84,6 +84,9 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             var session = await sessionPostService.CreateAsync(sessionRequest);
 
+            if (session != null)
+                await sessionPostService.SendToServiceBusQueueAsync(session, req.RequestUri.AbsoluteUri);
+
             return session == null
                 ? HttpResponseMessageHelper.BadRequest(customerGuid)
                 : HttpResponseMessageHelper.Created(JsonHelper.SerializeObject(session));

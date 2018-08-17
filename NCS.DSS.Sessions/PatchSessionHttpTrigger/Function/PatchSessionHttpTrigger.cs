@@ -92,6 +92,9 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             var updatedSession = await sessionPatchService.UpdateAsync(session, sessionPatchRequest);
 
+            if (updatedSession != null)
+                await sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, req.RequestUri.AbsoluteUri);
+
             return updatedSession == null ?
                 HttpResponseMessageHelper.BadRequest(sessionGuid) :
                 HttpResponseMessageHelper.Ok(JsonHelper.SerializeObject(updatedSession));

@@ -8,5 +8,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
     {
         Task<Session> UpdateAsync(Session session, SessionPatch sessionPatch);
         Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId);
+        Task SendToServiceBusQueueAsync(Session session, Guid customerId, string reqUrl);
     }
 }

@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
+using NCS.DSS.Sessions.ServiceBus;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {
@@ -31,6 +32,11 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
             var session = await documentDbProvider.GetSessionForCustomerAsync(customerId, sessionId);
 
             return session;
+        }
+
+        public async Task SendToServiceBusQueueAsync(Session session, Guid customerId, string reqUrl)
+        {
+            await ServiceBusClient.SendPatchMessageAsync(session, customerId, reqUrl);
         }
     }
 }
