@@ -28,10 +28,11 @@ namespace NCS.DSS.Sessions.ServiceBus
                 CustomerGuid = session.CustomerId,
                 LastModifiedDate = session.LastModifiedDate,
                 URL = reqUrl,
-                IsNewCustomer = false
+                IsNewCustomer = false,
+                TouchpointId = session.LastModifiedTouchpointId
             };
 
-            var msg = new BrokeredMessage(messageModel)
+            var msg = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))))
             {
                 ContentType = "application/json",
                 MessageId = session.CustomerId + " " + DateTime.UtcNow
@@ -52,7 +53,8 @@ namespace NCS.DSS.Sessions.ServiceBus
                 CustomerGuid = customerId,
                 LastModifiedDate = session.LastModifiedDate,
                 URL = reqUrl,
-                IsNewCustomer = false
+                IsNewCustomer = false,
+                TouchpointId = session.LastModifiedTouchpointId
             };
 
             var msg = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))))
@@ -74,6 +76,7 @@ namespace NCS.DSS.Sessions.ServiceBus
         public DateTime? LastModifiedDate { get; set; }
         public string URL { get; set; }
         public bool IsNewCustomer { get; set; }
+        public string TouchpointId { get; set; }
     }
 
 }
