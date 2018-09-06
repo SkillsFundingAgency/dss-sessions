@@ -43,6 +43,13 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 return HttpResponseMessageHelper.BadRequest();
             }
 
+            var ApimURL = httpRequestMessageHelper.GetApimURL(req);
+            if (string.IsNullOrEmpty(ApimURL))
+            {
+                log.LogInformation("Unable to locate 'apimurl' in request header");
+                return HttpResponseMessageHelper.BadRequest();
+            }
+
             log.LogInformation("C# HTTP trigger function Post Session processed a request. " + touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
@@ -90,7 +97,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             var session = await sessionPostService.CreateAsync(sessionRequest);
 
             if (session != null)
-                await sessionPostService.SendToServiceBusQueueAsync(session, req.RequestUri.AbsoluteUri);
+                await sessionPostService.SendToServiceBusQueueAsync(session, ApimURL);
 
             return session == null
                 ? HttpResponseMessageHelper.BadRequest(customerGuid)

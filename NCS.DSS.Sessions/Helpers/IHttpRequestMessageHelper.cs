@@ -8,5 +8,6 @@ namespace NCS.DSS.Sessions.Helpers
     {
         Task<T> GetSessionFromRequest<T>(HttpRequestMessage req);
         string GetTouchpointId(HttpRequestMessage req);
+        string GetApimURL(HttpRequestMessage req);
     }
 }

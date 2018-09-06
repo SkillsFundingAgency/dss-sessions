@@ -43,6 +43,13 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 return HttpResponseMessageHelper.BadRequest();
             }
 
+            var ApimURL = httpRequestMessageHelper.GetApimURL(req);
+            if (string.IsNullOrEmpty(ApimURL))
+            {
+                log.LogInformation("Unable to locate 'apimurl' in request header");
+                return HttpResponseMessageHelper.BadRequest();
+            }
+
             log.LogInformation("C# HTTP trigger function Patch Session processed a request. " + touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
@@ -98,7 +105,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             var updatedSession = await sessionPatchService.UpdateAsync(session, sessionPatchRequest);
 
             if (updatedSession != null)
-                await sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, req.RequestUri.AbsoluteUri);
+                await sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
 
             return updatedSession == null ?
                 HttpResponseMessageHelper.BadRequest(sessionGuid) :
