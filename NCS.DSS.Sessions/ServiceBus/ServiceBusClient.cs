@@ -27,7 +27,7 @@ namespace NCS.DSS.Sessions.ServiceBus
                 TitleMessage = "New Session record {" + session.SessionId + "} added at " + DateTime.UtcNow,
                 CustomerGuid = session.CustomerId,
                 LastModifiedDate = session.LastModifiedDate,
-                URL = reqUrl + session.SessionId,
+                URL = reqUrl + "/" + session.SessionId,
                 IsNewCustomer = false,
                 TouchpointId = session.LastModifiedTouchpointId
             };
