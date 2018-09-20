@@ -48,12 +48,12 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             if (!Guid.TryParse(sessionId, out var sessionGuid))
                 return HttpResponseMessageHelper.BadRequest(sessionGuid);
             
-            var doesCustomerExist = resourceHelper.DoesCustomerExist(customerGuid);
+            var doesCustomerExist = await resourceHelper.DoesCustomerExist(customerGuid);
 
             if (!doesCustomerExist)
                 return HttpResponseMessageHelper.NoContent(customerGuid);
 
-            var doesInteractionExist = resourceHelper.DoesInteractionExist(interactionGuid);
+            var doesInteractionExist = await resourceHelper.DoesInteractionExist(interactionGuid);
 
             if (!doesInteractionExist)
                 return HttpResponseMessageHelper.NoContent(interactionGuid);
