@@ -167,7 +167,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(false);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -183,7 +183,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult<Models.Session>(null).Result);
 
@@ -201,7 +201,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
@@ -220,7 +220,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
@@ -239,7 +239,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<SessionPatch>(_request).Returns(Task.FromResult(_sessionPatch).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
