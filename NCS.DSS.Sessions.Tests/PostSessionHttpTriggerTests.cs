@@ -136,7 +136,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(false);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
@@ -151,7 +151,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _postSessionHttpTriggerService.CreateAsync(Arg.Any<Models.Session>()).Returns(Task.FromResult<Models.Session>(null).Result);
 
@@ -168,7 +168,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _postSessionHttpTriggerService.CreateAsync(Arg.Any<Models.Session>()).Returns(Task.FromResult<Models.Session>(null).Result);
 
@@ -185,7 +185,7 @@ namespace NCS.DSS.Sessions.Tests
             _httpRequestMessageHelper.GetSessionFromRequest<Models.Session>(_request).Returns(Task.FromResult(_session).Result);
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionExist(Arg.Any<Guid>()).Returns(true);
+           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
             _postSessionHttpTriggerService.CreateAsync(Arg.Any<Models.Session>()).Returns(Task.FromResult<Models.Session>(_session).Result);
 

@@ -10,7 +10,7 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
     public interface IDocumentDBProvider
     {
         Task<bool> DoesCustomerResourceExist(Guid customerId);
-        Task<bool> DoesInteractionResourceExist(Guid interactionId);
+        bool DoesInteractionResourceExistAndBelongToCustomer(Guid interactionId, Guid customerId);
         Task<bool> DoesCustomerHaveATerminationDate(Guid customerId);
         Task<List<Session>> GetSessionsForCustomerAsync(Guid customerId);
         Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId);
