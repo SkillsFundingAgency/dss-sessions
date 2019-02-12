@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using NCS.DSS.Sessions.Annotations;
+using DFC.Swagger.Standard.Annotations;
 using NCS.DSS.Sessions.ReferenceData;
 
 namespace NCS.DSS.Sessions.Models
@@ -45,6 +45,11 @@ namespace NCS.DSS.Sessions.Models
         {
             if (!LastModifiedDate.HasValue)
                 LastModifiedDate = DateTime.UtcNow;
+        }
+
+        public void SetIds(string touchpointId)
+        {
+            LastModifiedTouchpointId = touchpointId;
         }
 
     }

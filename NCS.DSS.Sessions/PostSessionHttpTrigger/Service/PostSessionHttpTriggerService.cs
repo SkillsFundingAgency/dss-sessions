@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;

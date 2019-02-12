@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System;
-using System.Web.Http.Description;
 using System.ComponentModel.DataAnnotations;
-using NCS.DSS.Sessions.Annotations;
+using DFC.Swagger.Standard.Annotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NCS.DSS.Sessions.DeleteSessionHttpTrigger
 {
@@ -19,7 +19,7 @@ namespace NCS.DSS.Sessions.DeleteSessionHttpTrigger
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Delete request is malformed", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
-        [ResponseType(typeof(Models.Session))]
+        [ProducesResponseType(typeof(Models.Session),200)]
         [Display(Name = "Delete", Description = "Ability to delete a session object for a given customer.")]
         [Disable]
         public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "customers/{customerId}/sessions/{sessionId}")]HttpRequestMessage req, TraceWriter log, string customerId, string sessionId)
