@@ -135,6 +135,24 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
             return sessions?.FirstOrDefault();
         }
 
+        public async Task<string> GetSessionForCustomerToUpdateAsync(Guid customerId, Guid sessionId)
+        {
+            var collectionUri = DocumentDBHelper.CreateDocumentCollectionUri();
+
+            var client = DocumentDBClient.CreateDocumentClient();
+
+            var sessionForCustomerQuery = client
+                ?.CreateDocumentQuery<Session>(collectionUri, new FeedOptions {MaxItemCount = 1})
+                .Where(x => x.CustomerId == customerId && x.SessionId == sessionId)
+                .AsDocumentQuery();
+
+            if (sessionForCustomerQuery == null)
+                return null;
+
+            var sessions = await sessionForCustomerQuery.ExecuteNextAsync();
+
+            return sessions?.FirstOrDefault()?.ToString();
+        }
 
         public async Task<ResourceResponse<Document>> CreateSessionAsync(Session session)
         {
@@ -165,5 +183,7 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
 
             return response;
         }
+
+
     }
 }

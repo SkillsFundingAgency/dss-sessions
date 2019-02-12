@@ -68,6 +68,10 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 return httpResponseMessageHelper.BadRequest();
             }
 
+            var subcontractorId = httpRequestHelper.GetDssSubcontractorId(req);
+            if (string.IsNullOrEmpty(subcontractorId))
+                loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+
             loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Post Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",
                     touchpointId));
@@ -104,7 +108,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to set id's for session patch");
-            sessionRequest.SetIds(customerGuid, interactionGuid, touchpointId);
+            sessionRequest.SetIds(customerGuid, interactionGuid, touchpointId, subcontractorId);
 
             loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to validate resource");
             var errors = validate.ValidateResource(sessionRequest);

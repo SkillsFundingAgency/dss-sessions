@@ -19,7 +19,7 @@ using NCS.DSS.Sessions.Validation;
 
 namespace NCS.DSS.Sessions.Ioc
 {
-    public class WebJobsExtensionStartup
+    public class WebJobsExtensionStartup : IWebJobsStartup
     {
         public void Configure(IWebJobsBuilder builder)
         {
@@ -33,11 +33,12 @@ namespace NCS.DSS.Sessions.Ioc
             builder.Services.AddSingleton<IJsonHelper, JsonHelper>();
             builder.Services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
 
-            builder.Services.AddScoped<ISwaggerDocumentGenerator, SwaggerDocumentGenerator>();
+            builder.Services.AddTransient<ISwaggerDocumentGenerator, SwaggerDocumentGenerator>();
             builder.Services.AddTransient<IGetSessionHttpTriggerService, GetSessionHttpTriggerService>();
             builder.Services.AddTransient<IGetSessionByIdHttpTriggerService, GetSessionByIdHttpTriggerService>();
             builder.Services.AddTransient<IPostSessionHttpTriggerService, PostSessionHttpTriggerService>();
             builder.Services.AddTransient<IPatchSessionHttpTriggerService, PatchSessionHttpTriggerService>();
+            builder.Services.AddTransient<ISessionPatchService, SessionPatchService>();
         }
     }
 }

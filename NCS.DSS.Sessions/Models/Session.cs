@@ -55,6 +55,11 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "0000000001")]
         public string LastModifiedTouchpointId { get; set; }
 
+        [StringLength(50)]
+        [Display(Description = "Identifier supplied by the touchpoint to indicate their subcontractor")]
+        [Example(Description = "01234567899876543210")]
+        public string SubcontractorId { get; set; }
+
         public void SetDefaultValues()
         {
              SessionId = Guid.NewGuid();
@@ -66,37 +71,13 @@ namespace NCS.DSS.Sessions.Models
                 ReasonForNonAttendance = ReferenceData.ReasonForNonAttendance.NotKnown;
         }
 
-        public void SetIds(Guid customerId, Guid interactionId, string touchpointId)
+        public void SetIds(Guid customerId, Guid interactionId, string touchpointId, string subcontractorId)
         {
             SessionId = Guid.NewGuid();
             CustomerId = customerId;
             InteractionId = interactionId;
             LastModifiedTouchpointId = touchpointId;
-        }
-
-        public void Patch(SessionPatch sessionPatch)
-        {
-            if(sessionPatch == null)
-                return;
-
-            if(sessionPatch.DateandTimeOfSession.HasValue)
-                DateandTimeOfSession = sessionPatch.DateandTimeOfSession;
-
-            if (!string.IsNullOrEmpty(sessionPatch.VenuePostCode))
-                VenuePostCode = sessionPatch.VenuePostCode;
-
-            if (sessionPatch.SessionAttended.HasValue)
-                SessionAttended = sessionPatch.SessionAttended;
-
-            if (sessionPatch.ReasonForNonAttendance.HasValue)
-                ReasonForNonAttendance = sessionPatch.ReasonForNonAttendance.Value;
-
-            if (sessionPatch.LastModifiedDate.HasValue)
-                LastModifiedDate = sessionPatch.LastModifiedDate;
-
-            if (!string.IsNullOrEmpty(sessionPatch.LastModifiedTouchpointId))
-                LastModifiedTouchpointId = sessionPatch.LastModifiedTouchpointId;
-
+            SubcontractorId = subcontractorId;
         }
     }
 }

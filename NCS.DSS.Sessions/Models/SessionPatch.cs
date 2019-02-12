@@ -41,15 +41,22 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "0000000001")]
         public string LastModifiedTouchpointId { get; set; }
 
+        [StringLength(50)]
+        [Display(Description = "Identifier supplied by the touchpoint to indicate their subcontractor")]
+        [Example(Description = "01234567899876543210")]
+        public string SubcontractorId { get; set; }
+
+
         public void SetDefaultValues()
         {
             if (!LastModifiedDate.HasValue)
                 LastModifiedDate = DateTime.UtcNow;
         }
 
-        public void SetIds(string touchpointId)
+        public void SetIds(string touchpointId, string subcontractorId)
         {
             LastModifiedTouchpointId = touchpointId;
+            SubcontractorId = subcontractorId;
         }
 
     }

@@ -68,6 +68,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 return httpResponseMessageHelper.BadRequest();
             }
 
+            var subcontractorId = httpRequestHelper.GetDssSubcontractorId(req);
+            if (string.IsNullOrEmpty(subcontractorId))
+                loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+            
             loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Patch Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",
                     touchpointId));
@@ -110,7 +114,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to set id's for session patch");
-            sessionPatchRequest.SetIds(touchpointId);
+            sessionPatchRequest.SetIds(touchpointId, subcontractorId);
 
             loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to validate resource");
             var errors = validate.ValidateResource(sessionPatchRequest);
@@ -157,8 +161,17 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 return httpResponseMessageHelper.NoContent(sessionGuid);
             }
 
+            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Patch Session {0}", sessionGuid));
+            var sessionResource = sessionPatchService.PatchResource(session, sessionPatchRequest);
+
+            if (sessionResource == null)
+            {
+                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to Patch Session {0}", sessionGuid));
+                return httpResponseMessageHelper.NoContent(sessionGuid);
+            }
+
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to update Session {0}", sessionGuid));
-            var updatedSession = await sessionPatchService.UpdateAsync(session, sessionPatchRequest);
+            var updatedSession = await sessionPatchService.UpdateCosmosAsync(sessionResource);
 
             if (updatedSession != null)
             {
