@@ -181,7 +181,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             return updatedSession == null ?
                 httpResponseMessageHelper.BadRequest(sessionGuid) :
-                httpResponseMessageHelper.Ok(jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+                httpResponseMessageHelper.Ok(jsonHelper.SerializeObjectAndRenameIdProperty(updatedSession, "id", "SessionId"));
         }
     }
 }

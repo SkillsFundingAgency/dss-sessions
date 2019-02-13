@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DFC.Common.Standard.Logging;
+using DFC.HTTP.Standard;
+using DFC.JSON.Standard;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
-using NCS.DSS.Sessions.Helpers;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace NCS.DSS.Sessions.Tests
+namespace NCS.DSS.Sessions.Tests.FunctionTests
 {
     [TestFixture]
     public class GetSessionHttpTriggerTest
@@ -20,33 +24,41 @@ namespace NCS.DSS.Sessions.Tests
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
 
         private ILogger _log;
-        private HttpRequestMessage _request;
+        private HttpRequest _request;
         private IResourceHelper _resourceHelper;
-        private IHttpRequestMessageHelper _httpRequestMessageHelper;
+        private ILoggerHelper _loggerHelper;
+        private IHttpRequestHelper _httpRequestHelper;
+        private IHttpResponseMessageHelper _httpResponseMessageHelper;
+        private IJsonHelper _jsonHelper;
         private IGetSessionHttpTriggerService _getSessionHttpTriggerService;
 
         [SetUp]
         public void Setup()
         {
-            _request = new HttpRequestMessage()
-            {
-                Content = new StringContent(string.Empty),
-                RequestUri =
-                        new Uri($"http://localhost:7071/api/Customers/7E467BDB-213F-407A-B86A-1954053D3C24/" +
-                                $"Interactions/aa57e39e-4469-4c79-a9e9-9cb4ef410382/" +
-                                $"Sessions")
-            };
+            _request = new DefaultHttpRequest(new DefaultHttpContext());
+
             _log = Substitute.For<ILogger>();
             _resourceHelper = Substitute.For<IResourceHelper>();
-            _httpRequestMessageHelper = Substitute.For<IHttpRequestMessageHelper>();
+            _loggerHelper = Substitute.For<ILoggerHelper>();
+            _httpRequestHelper = Substitute.For<IHttpRequestHelper>();
+            _httpResponseMessageHelper = Substitute.For<IHttpResponseMessageHelper>();
+            _jsonHelper = Substitute.For<IJsonHelper>();
+            _resourceHelper = Substitute.For<IResourceHelper>();
             _getSessionHttpTriggerService = Substitute.For<IGetSessionHttpTriggerService>();
-            _httpRequestMessageHelper.GetTouchpointId(_request).Returns("0000000001");
+
+            _httpRequestHelper.GetDssTouchpointId(_request).Returns("0000000001");
+            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
+            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
+
         }
 
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenTouchpointIdIsNotProvided()
         {
-            _httpRequestMessageHelper.GetTouchpointId(_request).Returns((string)null);
+            _httpRequestHelper.GetDssTouchpointId(_request).Returns((string)null);
+
+            _httpResponseMessageHelper
+                .BadRequest().Returns(x => new HttpResponseMessage(HttpStatusCode.BadRequest));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
@@ -59,6 +71,9 @@ namespace NCS.DSS.Sessions.Tests
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenCustomerIdIsInvalid()
         {
+            _httpResponseMessageHelper
+                .BadRequest(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.BadRequest));
+
             // Act
             var result = await RunFunction(InValidId, ValidInteractionId);
 
@@ -70,6 +85,9 @@ namespace NCS.DSS.Sessions.Tests
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenInteractionIdIsInvalid()
         {
+            _httpResponseMessageHelper
+                .BadRequest(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.BadRequest));
+
             // Act
             var result = await RunFunction(ValidCustomerId, InValidId);
 
@@ -83,6 +101,9 @@ namespace NCS.DSS.Sessions.Tests
         {
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(false);
 
+            _httpResponseMessageHelper
+                .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
+
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
@@ -94,8 +115,10 @@ namespace NCS.DSS.Sessions.Tests
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
         {
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
+
+            _httpResponseMessageHelper
+                .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
@@ -108,10 +131,10 @@ namespace NCS.DSS.Sessions.Tests
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenSessionDoesNotExist()
         {
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
-           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
-
             _getSessionHttpTriggerService.GetSessionsAsync(Arg.Any<Guid>()).Returns(Task.FromResult<List<Models.Session>>(null).Result);
+
+            _httpResponseMessageHelper
+                .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
@@ -124,11 +147,10 @@ namespace NCS.DSS.Sessions.Tests
         [Test]
         public async Task GetSessionHttpTrigger_ReturnsStatusCodeOk_WhenSessionExists()
         {
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
-           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
+            _getSessionHttpTriggerService.GetSessionsAsync(Arg.Any<Guid>()).Returns(Task.FromResult(new List<Models.Session>()).Result);
 
-            var listOfSessiones = new List<Models.Session>();
-            _getSessionHttpTriggerService.GetSessionsAsync(Arg.Any<Guid>()).Returns(Task.FromResult<List<Models.Session>>(listOfSessiones).Result);
+            _httpResponseMessageHelper
+                .Ok(Arg.Any<string>()).Returns(x => new HttpResponseMessage(HttpStatusCode.OK));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
@@ -141,7 +163,17 @@ namespace NCS.DSS.Sessions.Tests
         private async Task<HttpResponseMessage> RunFunction(string customerId, string interactionId)
         {
             return await GetSessionHttpTrigger.Function.GetSessionHttpTrigger.Run(
-                _request, _log, customerId, interactionId, _resourceHelper, _httpRequestMessageHelper ,_getSessionHttpTriggerService).ConfigureAwait(false);
+                _request, 
+                _log, 
+                customerId,
+                interactionId, 
+                _resourceHelper,
+                _getSessionHttpTriggerService,
+                _loggerHelper,
+                _httpRequestHelper,
+                _httpResponseMessageHelper,
+                _jsonHelper
+                ).ConfigureAwait(false);
         }
 
     }

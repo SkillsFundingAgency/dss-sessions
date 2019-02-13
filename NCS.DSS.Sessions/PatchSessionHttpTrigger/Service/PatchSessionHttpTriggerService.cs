@@ -40,7 +40,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
             var response = await _documentDbProvider.UpdateSessionAsync(session);
 
-            var responseStatusCode = response.StatusCode;
+            var responseStatusCode = response?.StatusCode;
 
             return responseStatusCode == HttpStatusCode.OK ? session : null;
         }
