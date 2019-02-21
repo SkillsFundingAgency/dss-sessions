@@ -97,12 +97,17 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (!doesInteractionExist)
                 return HttpResponseMessageHelper.NoContent(interactionGuid);
 
-            var session = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
+            var sessionForCustomer = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
-            if (session == null)
+            if (sessionForCustomer == null)
+                return HttpResponseMessageHelper.NoContent(sessionGuid);
+            
+            var patchedSession = sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
+
+            if (patchedSession == null)
                 return HttpResponseMessageHelper.NoContent(sessionGuid);
 
-            var updatedSession = await sessionPatchService.UpdateAsync(session, sessionPatchRequest);
+            var updatedSession = await sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
 
             if (updatedSession != null)
                 await sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
