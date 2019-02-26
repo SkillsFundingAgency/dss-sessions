@@ -153,25 +153,25 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to get sessions for customer {0}", customerGuid));
-            var session = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
+            var sessionForCustomer = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
-            if (session == null)
+            if (sessionForCustomer == null)
             {
                 loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Session does not exist {0}", sessionGuid));
                 return httpResponseMessageHelper.NoContent(sessionGuid);
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Patch Session {0}", sessionGuid));
-            var sessionResource = sessionPatchService.PatchResource(session, sessionPatchRequest);
+            var patchedSession = sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
 
-            if (sessionResource == null)
+            if (patchedSession == null)
             {
                 loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to Patch Session {0}", sessionGuid));
                 return httpResponseMessageHelper.NoContent(sessionGuid);
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to update Session {0}", sessionGuid));
-            var updatedSession = await sessionPatchService.UpdateCosmosAsync(sessionResource);
+            var updatedSession = await sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
 
             if (updatedSession != null)
             {

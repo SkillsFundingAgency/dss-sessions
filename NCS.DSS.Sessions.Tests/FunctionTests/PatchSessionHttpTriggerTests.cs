@@ -39,6 +39,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IPatchSessionHttpTriggerService _patchSessionHttpTriggerService;
         private Session _session;
         private SessionPatch _sessionPatch;
+        private string _sessionString;
 
         [SetUp]
         public void Setup()
@@ -57,7 +58,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _resourceHelper = Substitute.For<IResourceHelper>();
             _validate = Substitute.For<IValidate>();
             _patchSessionHttpTriggerService = Substitute.For<IPatchSessionHttpTriggerService>();
-            _patchSessionHttpTriggerService.PatchResource(Arg.Any<string>(), _sessionPatch).Returns(_session);
+            _sessionString = JsonConvert.SerializeObject(_session);
+
+            _patchSessionHttpTriggerService.PatchResource(Arg.Any<string>(), _sessionPatch).Returns(_sessionString);
 
             _httpRequestHelper.GetDssTouchpointId(_request).Returns("0000000001");
             _httpRequestHelper.GetDssApimUrl(_request).Returns("http://localhost:7071/");
@@ -132,7 +135,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         public async Task PatchSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenSessionPatchCantBePatched()
         {
 
-            _patchSessionHttpTriggerService.PatchResource(Arg.Any<string>(), Arg.Any<SessionPatch>()).Returns((Session)null);
+            _patchSessionHttpTriggerService.PatchResource(Arg.Any<string>(), Arg.Any<SessionPatch>()).Returns((string)null);
 
             _httpResponseMessageHelper
                 .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
@@ -226,9 +229,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         [Test]
         public async Task PatchSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenUnableToUpdateSessionRecord()
         {
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult("session").Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_sessionString).Result);
 
-            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<Session>()).Returns(Task.FromResult<Session>(null).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult<Session>(null).Result);
 
             _httpResponseMessageHelper
                 .BadRequest(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.BadRequest));
@@ -243,9 +246,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         [Test]
         public async Task PatchSessionHttpTrigger_ReturnsStatusCodeBadRequest_WhenRequestIsNotValid()
         {
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult("session").Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_sessionString).Result);
 
-            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<Session>()).Returns(Task.FromResult<Session>(null).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult<Session>(null).Result);
 
             _httpResponseMessageHelper
                 .BadRequest(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.BadRequest));
@@ -260,9 +263,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         [Test]
         public async Task PatchSessionHttpTrigger_ReturnsStatusCodeOK_WhenRequestIsValid()
         {
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult("session").Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_sessionString).Result);
 
-            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<Session>()).Returns(Task.FromResult(_session).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
             _httpResponseMessageHelper
                 .Ok(Arg.Any<string>()).Returns(x => new HttpResponseMessage(HttpStatusCode.OK));

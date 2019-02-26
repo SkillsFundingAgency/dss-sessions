@@ -20,6 +20,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     [TestFixture]
     public class PatchSessionHttpTriggerServiceTests
     {
+        private readonly Guid _sessionId = Guid.Parse("7E467BDB-213F-407A-B86A-1954053D3C24");
         private IPatchSessionHttpTriggerService _sessionPatchHttpTriggerService;
         private ISessionPatchService _sessionPatchService;
         private IDocumentDBProvider _documentDbProvider;
@@ -36,7 +37,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             _session = Substitute.For<Session>();
             _sessionPatch = Substitute.For<SessionPatch>();
             _json = JsonConvert.SerializeObject(_sessionPatch);
-            _sessionPatchService.Patch(_json, _sessionPatch).Returns(_session);
+            _sessionPatchService.Patch(_json, _sessionPatch).Returns(_session.ToString());
         }
 
         [Test]
@@ -63,10 +64,10 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeUpdated()
         {
-            _documentDbProvider.UpdateSessionAsync(Arg.Any<Session>()).ReturnsNull();
+            _documentDbProvider.UpdateSessionAsync(Arg.Any<string>(), Arg.Any<Guid>()).ReturnsNull();
 
             // Act
-            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_session);
+            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
             Assert.IsNull(result);
@@ -78,7 +79,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             _documentDbProvider.CreateSessionAsync(_session).Returns(Task.FromResult(new ResourceResponse<Document>(null)).Result);
 
             // Act
-            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_session);
+            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
             Assert.IsNull(result);
@@ -109,10 +110,10 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
 
             responseField?.SetValue(resourceResponse, documentServiceResponse);
 
-            _documentDbProvider.UpdateSessionAsync(Arg.Any<Session>()).Returns(Task.FromResult(resourceResponse).Result);
+            _documentDbProvider.UpdateSessionAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult(resourceResponse).Result);
 
             // Act
-            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_session);
+            var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
             Assert.IsNotNull(result);

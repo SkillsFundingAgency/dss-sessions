@@ -43,7 +43,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { DateandTimeOfSession = DateTime.MaxValue };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual(DateTime.MaxValue, session.DateandTimeOfSession);
@@ -54,7 +56,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { VenuePostCode = "CV1 1VC" };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual("CV1 1VC", session.VenuePostCode);
@@ -65,7 +69,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { SessionAttended = true };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual(true, session.SessionAttended);
@@ -76,7 +82,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { ReasonForNonAttendance = ReasonForNonAttendance.Forgot };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual(ReasonForNonAttendance.Forgot, session.ReasonForNonAttendance);
@@ -87,7 +95,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { LastModifiedDate = DateTime.MaxValue };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual(DateTime.MaxValue, session.LastModifiedDate);
@@ -98,7 +108,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { LastModifiedTouchpointId = "0000000111" };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual("0000000111", session.LastModifiedTouchpointId);
@@ -109,7 +121,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             var sessionPatch = new SessionPatch { SubcontractorId = "0000000111" };
 
-            var session = _sessionPatchService.Patch(_json, sessionPatch);
+            var patchedSession = _sessionPatchService.Patch(_json, sessionPatch);
+
+            var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
             Assert.AreEqual("0000000111", session.SubcontractorId);

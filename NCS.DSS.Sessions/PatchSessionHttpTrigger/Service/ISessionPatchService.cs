@@ -7,6 +7,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {
     public interface ISessionPatchService
     {
-        Session Patch(string sessionJson, SessionPatch sessionPatch);
+        string Patch(string sessionJson, SessionPatch sessionPatch);
     }
 }

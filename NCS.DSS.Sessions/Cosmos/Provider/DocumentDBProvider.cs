@@ -8,6 +8,7 @@ using Microsoft.Azure.Documents.Linq;
 using NCS.DSS.Sessions.Cosmos.Client;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Models;
+using Newtonsoft.Json.Linq;
 
 namespace NCS.DSS.Sessions.Cosmos.Provider
 {
@@ -170,20 +171,24 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
 
         }
 
-        public async Task<ResourceResponse<Document>> UpdateSessionAsync(Session session)
+        public async Task<ResourceResponse<Document>> UpdateSessionAsync(string sessionJson, Guid sessionId)
         {
-            var documentUri = DocumentDBHelper.CreateDocumentUri(session.SessionId.GetValueOrDefault());
+            if (string.IsNullOrEmpty(sessionJson))
+                return null;
+
+            var documentUri = DocumentDBHelper.CreateDocumentUri(sessionId);
 
             var client = DocumentDBClient.CreateDocumentClient();
 
             if (client == null)
                 return null;
 
-            var response = await client.ReplaceDocumentAsync(documentUri, session);
+            var sessionDocumentJObject = JObject.Parse(sessionJson);
+
+            var response = await client.ReplaceDocumentAsync(documentUri, sessionDocumentJObject);
 
             return response;
         }
-
 
     }
 }

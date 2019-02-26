@@ -16,7 +16,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
             _jsonHelper = jsonHelper;
         }
 
-        public Session Patch(string sessionJson, SessionPatch sessionPatch)
+        public string Patch(string sessionJson, SessionPatch sessionPatch)
         {
             if (string.IsNullOrEmpty(sessionJson))
                 return null;
@@ -42,9 +42,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
                 _jsonHelper.UpdatePropertyValue(obj["LastModifiedTouchpointId"], sessionPatch.LastModifiedTouchpointId);
 
             if (!string.IsNullOrEmpty(sessionPatch.SubcontractorId))
-                _jsonHelper.UpdatePropertyValue(obj["SubcontractorId"], sessionPatch.SubcontractorId);
+            {
+                if (obj["SubcontractorId"] == null)
+                    _jsonHelper.CreatePropertyOnJObject(obj, "SubcontractorId", sessionPatch.SubcontractorId);
+                else
+                    _jsonHelper.UpdatePropertyValue(obj["SubcontractorId"], sessionPatch.SubcontractorId);
+            }
 
-            return obj.ToObject<Session>();
+            return obj.ToString();
 
         }
     }
