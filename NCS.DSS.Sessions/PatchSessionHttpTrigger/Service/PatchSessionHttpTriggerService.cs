@@ -9,27 +9,45 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {
     public class PatchSessionHttpTriggerService : IPatchSessionHttpTriggerService
     {
-        public async Task<Session> UpdateAsync(Session session, SessionPatch sessionPatch)
+        private readonly ISessionPatchService _sessionPatchService;
+        private readonly IDocumentDBProvider _documentDbProvider;
+
+        public PatchSessionHttpTriggerService(IDocumentDBProvider documentDbProvider, ISessionPatchService sessionPatchService)
         {
-            if (session == null)
+            _documentDbProvider = documentDbProvider;
+            _sessionPatchService = sessionPatchService;
+        }
+
+        public string PatchResource(string sessionJson, SessionPatch sessionPatch)
+        {
+            if (string.IsNullOrEmpty(sessionJson))
+                return null;
+
+            if (sessionPatch == null)
                 return null;
 
             sessionPatch.SetDefaultValues();
 
-            session.Patch(sessionPatch);
+            var updatedSession = _sessionPatchService.Patch(sessionJson, sessionPatch);
 
-            var documentDbProvider = new DocumentDBProvider();
-            var response = await documentDbProvider.UpdateSessionAsync(session);
-
-            var responseStatusCode = response.StatusCode;
-
-            return responseStatusCode == HttpStatusCode.OK ? session : null;
+            return updatedSession;
         }
 
-        public async Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
+        public async Task<Session> UpdateCosmosAsync(string sessionJson, Guid sessionId)
         {
-            var documentDbProvider = new DocumentDBProvider();
-            var session = await documentDbProvider.GetSessionForCustomerAsync(customerId, sessionId);
+            if (string.IsNullOrEmpty(sessionJson))
+                return null;
+
+            var response = await _documentDbProvider.UpdateSessionAsync(sessionJson, sessionId);
+
+            var responseStatusCode = response?.StatusCode;
+
+            return responseStatusCode == HttpStatusCode.OK ? (dynamic)response.Resource : null;
+        }
+
+        public async Task<string> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
+        {
+            var session = await _documentDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
 
             return session;
         }

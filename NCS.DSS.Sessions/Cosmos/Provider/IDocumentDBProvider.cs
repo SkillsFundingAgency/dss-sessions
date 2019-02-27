@@ -14,7 +14,9 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
         Task<bool> DoesCustomerHaveATerminationDate(Guid customerId);
         Task<List<Session>> GetSessionsForCustomerAsync(Guid customerId);
         Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId);
+        Task<string> GetSessionForCustomerToUpdateAsync(Guid customerId, Guid sessionId);
+
         Task<ResourceResponse<Document>> CreateSessionAsync(Session session);
-        Task<ResourceResponse<Document>> UpdateSessionAsync(Session session);
+        Task<ResourceResponse<Document>> UpdateSessionAsync(string sessionJson, Guid sessionId);
     }
 }

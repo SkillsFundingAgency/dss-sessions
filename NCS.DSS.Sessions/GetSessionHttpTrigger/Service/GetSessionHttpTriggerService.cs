@@ -8,10 +8,17 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Service
 {
     public class GetSessionHttpTriggerService : IGetSessionHttpTriggerService
     {
+
+        private readonly IDocumentDBProvider _documentDbProvider;
+        
+        public GetSessionHttpTriggerService(IDocumentDBProvider documentDbProvider)
+        {
+            _documentDbProvider = documentDbProvider;
+        }
+
         public async Task<List<Session>> GetSessionsAsync(Guid customerId)
         {
-            var documentDbProvider = new DocumentDBProvider();
-            var sessions = await documentDbProvider.GetSessionsForCustomerAsync(customerId);
+            var sessions = await _documentDbProvider.GetSessionsForCustomerAsync(customerId);
 
             return sessions;
         }
