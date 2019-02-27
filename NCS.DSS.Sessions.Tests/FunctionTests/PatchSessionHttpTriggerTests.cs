@@ -15,7 +15,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 
-namespace NCS.DSS.Sessions.Tests
+namespace NCS.DSS.Sessions.Tests.FunctionTests
 {
     [TestFixture]
     public class PatchSessionHttpTriggerTests
@@ -151,7 +151,7 @@ namespace NCS.DSS.Sessions.Tests
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
 
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult<Session>(null).Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult<string>(null).Result);
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -185,7 +185,7 @@ namespace NCS.DSS.Sessions.Tests
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(true);
            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult<Models.Session>(null).Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult<string>(null).Result);
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -203,9 +203,9 @@ namespace NCS.DSS.Sessions.Tests
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session.ToString()).Result);
 
-            _patchSessionHttpTriggerService.UpdateAsync(Arg.Any<Session>(), Arg.Any<SessionPatch>()).Returns(Task.FromResult<Session>(null).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult<Session>(null).Result);
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
 
@@ -222,9 +222,9 @@ namespace NCS.DSS.Sessions.Tests
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session.ToString()).Result);
 
-            _patchSessionHttpTriggerService.UpdateAsync(Arg.Any<Session>(), Arg.Any<SessionPatch>()).Returns(Task.FromResult<Models.Session>(null).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult<Models.Session>(null).Result);
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
 
@@ -241,9 +241,9 @@ namespace NCS.DSS.Sessions.Tests
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
 
-            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
+            _patchSessionHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session.ToString()).Result);
 
-            _patchSessionHttpTriggerService.UpdateAsync(Arg.Any<Session>(), Arg.Any<SessionPatch>()).Returns(Task.FromResult(_session).Result);
+            _patchSessionHttpTriggerService.UpdateCosmosAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult(_session).Result);
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
 

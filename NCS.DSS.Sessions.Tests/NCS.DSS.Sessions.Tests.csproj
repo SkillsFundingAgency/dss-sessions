@@ -84,11 +84,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GetSessionByIdHttpTriggerTests.cs" />
-    <Compile Include="GetSessionHttpTriggerTest.cs" />
-    <Compile Include="PatchSessionHttpTriggerTests.cs" />
-    <Compile Include="PostSessionHttpTriggerTests.cs" />
+    <Compile Include="FunctionTests\GetSessionByIdHttpTriggerTests.cs" />
+    <Compile Include="FunctionTests\GetSessionHttpTriggerTest.cs" />
+    <Compile Include="FunctionTests\PatchSessionHttpTriggerTests.cs" />
+    <Compile Include="FunctionTests\PostSessionHttpTriggerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceTests\SessionPatchServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -100,6 +101,7 @@
       <Name>NCS.DSS.Sessions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
