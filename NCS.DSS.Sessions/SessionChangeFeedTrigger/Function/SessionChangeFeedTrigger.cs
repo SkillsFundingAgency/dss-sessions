@@ -42,7 +42,7 @@ namespace NCS.DSS.Sessions.SessionChangeFeedTrigger.Function
             }
             catch (Exception ex)
             {
-                loggerHelper.LogException(log, Guid.NewGuid(), "Error when trying to upsert into SQL", ex);
+                loggerHelper.LogException(log, Guid.NewGuid(), "Error when trying to add message to service bus queue", ex);
             }
 
             loggerHelper.LogMethodExit(log);
