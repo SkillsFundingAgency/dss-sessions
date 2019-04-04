@@ -22,13 +22,7 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "true/false")]
         public bool? SessionAttended { get; set; }
 
-        [Display(Description = "Reason For Non Attendance reference data   :   " +
-                                "1 - Forgot,  " +
-                                "2 - No longer needed,  " +
-                                "3 - Work related,  " +
-                                "4 - Personal situation,  " +
-                                "5 - Rescheduled,  " +
-                                "99 - Not known ")]
+        [Display(Description = "Reason For Non Attendance reference data.")]
         [Example(Description = "1")]
         public ReasonForNonAttendance? ReasonForNonAttendance { get; set; }
 
