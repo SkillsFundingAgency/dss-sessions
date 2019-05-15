@@ -60,8 +60,10 @@ namespace NCS.DSS.Sessions.Models
         public decimal? Longitude { get; set; }
         [JsonIgnoreOnSerialize]
         public decimal? Latitude { get; set; }
-
-
+        
+        [JsonIgnoreOnSerialize]
+        public string CreatedBy { get; set; }
+        
         public void SetDefaultValues()
         {
              SessionId = Guid.NewGuid();
@@ -80,6 +82,7 @@ namespace NCS.DSS.Sessions.Models
             InteractionId = interactionId;
             LastModifiedTouchpointId = touchpointId;
             SubcontractorId = subcontractorId;
+            CreatedBy = touchpointId;
         }
 
         public void SetLongitudeAndLatitude(Position position)
