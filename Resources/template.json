@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
+    "ApiVersion": {
+      "type": "string"
+    },
+    "AzureMapURL": {
+      "type": "string"
+    },
     "cosmosDbCollectionId": {
       "type": "string"
     },
@@ -12,7 +18,7 @@
       "type": "string"
     },
     "cosmosDbKey": {
-      "type": "string"
+      "type": "SecureString"
     },
     "environmentName": {
       "type": "string"
@@ -21,7 +27,7 @@
       "type": "array"
     },
     "serviceBusAccessKey": {
-      "type": "string"
+      "type": "SecureString"
     },
     "serviceBusAccessKeyName": {
       "type": "string"
@@ -37,6 +43,9 @@
     },
     "sharedAppServicePlanResourceGroup": {
       "type": "string"
+    },
+    "SubscriptionKey": {
+      "type": "SecureString"
     },
     "templateBaseUrl": {
       "type": "string"
@@ -61,8 +70,14 @@
                 "functionAppName": {
                   "value": "[parameters('functionAppNames')[copyIndex()]]"
                 },
+                "ApiVersion": {
+                  "value": "[parameters('ApiVersion')]"
+                },
                 "appServicePlanId": {
                   "value": "[variables('sharedAppServicePlanId')]"
+                },
+                "AzureMapURL": {
+                  "value": "[parameters('AzureMapURL')]"
                 },
                 "configEnvironmentName": {
                   "value": "[parameters('environmentName')]"
@@ -90,6 +105,9 @@
                 },
                 "serviceBusQueueName": {
                   "value": "[parameters('serviceBusQueueName')]"
+                },
+                "SubscriptionKey": {
+                  "value": "[parameters('SubscriptionKey')]"
                 }
               }
             },
