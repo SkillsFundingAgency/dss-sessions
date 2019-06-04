@@ -49,6 +49,22 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
                     _jsonHelper.UpdatePropertyValue(obj["SubcontractorId"], sessionPatch.SubcontractorId);
             }
 
+            if (sessionPatch.Longitude.HasValue)
+            {
+                if (obj["Longitude"] == null)
+                    _jsonHelper.CreatePropertyOnJObject(obj, "Longitude", sessionPatch.Longitude);
+                else
+                    _jsonHelper.UpdatePropertyValue(obj["Longitude"], sessionPatch.Longitude);
+            }
+
+            if (sessionPatch.Latitude.HasValue)
+            {
+                if (obj["Latitude"] == null)
+                    _jsonHelper.CreatePropertyOnJObject(obj, "Latitude", sessionPatch.Latitude);
+                else
+                    _jsonHelper.UpdatePropertyValue(obj["Latitude"], sessionPatch.Latitude);
+            }
+
             return obj.ToString();
 
         }

@@ -16,9 +16,11 @@ using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using DFC.Functions.DI.Standard.Attributes;
 using DFC.Common.Standard.Logging;
+using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using Microsoft.AspNetCore.Http;
+using NCS.DSS.Sessions.GeoCoding;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 {
@@ -40,7 +42,8 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             [Inject]ILoggerHelper loggerHelper,
             [Inject]IHttpRequestHelper httpRequestHelper,
             [Inject]IHttpResponseMessageHelper httpResponseMessageHelper,
-            [Inject]IJsonHelper jsonHelper)
+            [Inject]IJsonHelper jsonHelper, 
+            [Inject]IGeoCodingService geoCodingService)
         {
             loggerHelper.LogMethodEnter(log);
 
@@ -159,6 +162,23 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             {
                 loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Session does not exist {0}", sessionGuid));
                 return httpResponseMessageHelper.NoContent(sessionGuid);
+            }
+
+            if (!string.IsNullOrEmpty(sessionPatchRequest.VenuePostCode))
+            {
+                Position position;
+
+                try
+                {
+                    position = await geoCodingService.GetPositionForPostcodeAsync(sessionPatchRequest.VenuePostCode);
+                }
+                catch (Exception e)
+                {
+                    loggerHelper.LogException(log, correlationGuid, string.Format("Unable to get long and lat for postcode: {0}", sessionPatchRequest.VenuePostCode), e);
+                    throw;
+                }
+
+                sessionPatchRequest.SetLongitudeAndLatitude(position);
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Patch Session {0}", sessionGuid));

@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DFC.GeoCoding.Standard.AzureMaps.Model;
+using DFC.JSON.Standard.Attributes;
 using NCS.DSS.Sessions.ReferenceData;
 using DFC.Swagger.Standard.Annotations;
 
@@ -54,6 +56,12 @@ namespace NCS.DSS.Sessions.Models
         [Example(Description = "01234567899876543210")]
         public string SubcontractorId { get; set; }
 
+        [JsonIgnoreOnSerialize]
+        public decimal? Longitude { get; set; }
+        [JsonIgnoreOnSerialize]
+        public decimal? Latitude { get; set; }
+
+
         public void SetDefaultValues()
         {
              SessionId = Guid.NewGuid();
@@ -72,6 +80,15 @@ namespace NCS.DSS.Sessions.Models
             InteractionId = interactionId;
             LastModifiedTouchpointId = touchpointId;
             SubcontractorId = subcontractorId;
+        }
+
+        public void SetLongitudeAndLatitude(Position position)
+        {
+            if (position == null)
+                return;
+
+            Longitude = (decimal)position.Lon;
+            Latitude = (decimal)position.Lat;
         }
     }
 }

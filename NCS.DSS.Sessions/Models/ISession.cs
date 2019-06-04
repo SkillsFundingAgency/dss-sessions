@@ -1,4 +1,5 @@
 ﻿using System;
+using DFC.GeoCoding.Standard.AzureMaps.Model;
 using NCS.DSS.Sessions.ReferenceData;
 
 namespace NCS.DSS.Sessions.Models
@@ -13,5 +14,7 @@ namespace NCS.DSS.Sessions.Models
         string LastModifiedTouchpointId { get; set; }
 
         void SetDefaultValues();
+        void SetLongitudeAndLatitude(Position position);
+
     }
 }
