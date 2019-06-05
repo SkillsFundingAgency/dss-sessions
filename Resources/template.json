@@ -18,7 +18,7 @@
       "type": "string"
     },
     "cosmosDbKey": {
-      "type": "secureString"
+      "type": "securestring"
     },
     "environmentName": {
       "type": "string"
@@ -42,10 +42,10 @@
       "type": "string"
     },
     "storageAccountKey": {
-      "type": "secureString"
+      "type": "securestring"
     },
     "subscriptionKey": {
-      "type": "secureString"
+      "type": "securestring"
     },
     "templateBaseUrl": {
       "type": "string"
@@ -71,13 +71,13 @@
                   "value": "[parameters('functionAppNames')[copyIndex()]]"
                 },
                 "apiVersion": {
-                  "value": "[parameters('ApiVersion')]"
+                  "value": "[parameters('apiVersion')]"
                 },
                 "appServicePlanId": {
                   "value": "[variables('sharedAppServicePlanId')]"
                 },
                 "azureMapURL": {
-                  "value": "[parameters('AzureMapURL')]"
+                  "value": "[parameters('azureMapURL')]"
                 },
                 "configEnvironmentName": {
                   "value": "[parameters('environmentName')]"
@@ -107,7 +107,7 @@
                   "value": "[parameters('storageAccountKey')]"
                 },
                 "subscriptionKey": {
-                  "value": "[parameters('SubscriptionKey')]"
+                  "value": "[parameters('subscriptionKey')]"
                 }
               }
             },

@@ -2,6 +2,12 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "apiVersion": {
+      "type": "string"
+    },
+    "azureMapURL": {
+      "type": "string"
+    },
     "appServicePlanId": {
       "type": "string"
     },
@@ -18,7 +24,7 @@
       "type": "string"
     },
     "cosmosDbKey": {
-      "type": "string"
+      "type": "securestring"
     },
     "functionAppName": {
       "type": "string"
@@ -33,8 +39,11 @@
       "type": "string"
     },
     "storageAccountKey": {
-      "type": "string"
-    }
+      "type": "securestring"
+    },
+    "subscriptionKey": {
+      "type": "securestring"
+    },
   },
   "variables": {
     "appInsightsName": "[concat('dss-', toLower(parameters('configEnvironmentName')), '-', split(parameters('functionAppName'), '-')[2], '-ai')]",
@@ -68,6 +77,14 @@
             {
               "name": "AzureWebJobsStorage",
               "value": "[variables('storageAccountConnectionString')]"
+            },
+            {
+              "name": "ApiVersion",
+              "value": "[parameters('apiVersion')]"
+            },
+            {
+              "name": "AzureMapURL",
+              "value": "[parameters('azureMapURL')]"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -108,6 +125,10 @@
             {
               "name": "LeaseCollectionPrefix",
               "value": "sessionChangeFeedPrefix"
+            },
+            {
+              "name": "SubscriptionKey",
+              "value": "[parameters('subscriptionKey')]"
             },
             {
               "name": "ServiceBusConnectionString",
