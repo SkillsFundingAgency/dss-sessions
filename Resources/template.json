@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
+    "ApiVersion": {
+      "type": "string"
+    },
+    "AzureMapURL": {
+      "type": "string"
+    },
     "cosmosDbCollectionId": {
       "type": "string"
     },
@@ -12,7 +18,7 @@
       "type": "string"
     },
     "cosmosDbKey": {
-      "type": "string"
+      "type": "secureString"
     },
     "environmentName": {
       "type": "string"
@@ -36,7 +42,10 @@
       "type": "string"
     },
     "storageAccountKey": {
-      "type": "string"
+      "type": "secureString"
+    },
+    "SubscriptionKey": {
+      "type": "secureString"
     },
     "templateBaseUrl": {
       "type": "string"
@@ -61,8 +70,14 @@
                 "functionAppName": {
                   "value": "[parameters('functionAppNames')[copyIndex()]]"
                 },
+                "ApiVersion": {
+                  "value": "[parameters('ApiVersion')]"
+                },
                 "appServicePlanId": {
                   "value": "[variables('sharedAppServicePlanId')]"
+                },
+                "AzureMapURL": {
+                  "value": "[parameters('AzureMapURL')]"
                 },
                 "configEnvironmentName": {
                   "value": "[parameters('environmentName')]"
@@ -90,6 +105,9 @@
                 },
                 "storageAccountKey": {
                   "value": "[parameters('storageAccountKey')]"
+                },
+                "SubscriptionKey": {
+                  "value": "[parameters('SubscriptionKey')]"
                 }
               }
             },
