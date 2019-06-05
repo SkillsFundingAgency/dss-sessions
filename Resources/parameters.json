@@ -5,10 +5,10 @@
         "templateBaseUrl": {
             "value": "https://raw.githubusercontent.com/SkillsFundingAgency/cdh-central/master/Resources/"
         },
-        "AzureMapURL": {
+        "azureMapURL": {
             "value": "https://atlas.microsoft.com/search"
         },
-        "ApiVersion": {
+        "apiVersion": {
             "value": "1.0"
         },
         "environmentName": {
@@ -23,7 +23,7 @@
         "sharedAppServicePlanResourceGroup": {
             "value": ""
         },
-        "SubscriptionKey": {
+        "subscriptionKey": {
             "value": ""
         }
     }
