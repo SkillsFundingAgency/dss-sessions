@@ -2,13 +2,16 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "apiVersion": {
-            "type": "string"
-        },
-        "azureMapURL": {
-            "type": "string"
-        },
         "appServicePlanId": {
+            "type": "string"
+        },
+        "azureMapsSubscriptionKey": {
+            "type": "securestring"
+        },
+        "azureMapsApiVersion": {
+            "type": "string"
+        },
+        "azureMapsUrl": {
             "type": "string"
         },
         "configEnvironmentName": {
@@ -39,9 +42,6 @@
             "type": "string"
         },
         "storageAccountKey": {
-            "type": "securestring"
-        },
-        "subscriptionKey": {
             "type": "securestring"
         }
     },
@@ -82,11 +82,11 @@
                         },
                         {
                             "name": "ApiVersion",
-                            "value": "[parameters('apiVersion')]"
+                            "value": "[parameters('azureMapsApiVersion')]"
                         },
                         {
                             "name": "AzureMapURL",
-                            "value": "[parameters('azureMapURL')]"
+                            "value": "[parameters('azureMapsUrl')]"
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -130,7 +130,7 @@
                         },
                         {
                             "name": "SubscriptionKey",
-                            "value": "[parameters('subscriptionKey')]"
+                            "value": "[parameters('azureMapsSubscriptionKey')]"
                         },
                         {
                             "name": "ServiceBusConnectionString",
