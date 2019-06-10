@@ -1,56 +1,56 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-  "parameters": {
-    "apiVersion": {
-      "type": "string"
+    "parameters": {
+        "apiVersion": {
+            "type": "string"
+        },
+        "azureMapURL": {
+            "type": "string"
+        },
+        "cosmosDbCollectionId": {
+            "type": "string"
+        },
+        "cosmosDbDatabaseId": {
+            "type": "string"
+        },
+        "cosmosDbEndpoint": {
+            "type": "string"
+        },
+        "cosmosDbKey": {
+            "type": "securestring"
+        },
+        "environmentName": {
+            "type": "string"
+        },
+        "functionAppNames": {
+            "type": "array"
+        },
+        "serviceBusConnectionString": {
+            "type": "string"
+        },
+        "serviceBusQueueName": {
+            "type": "string"
+        },
+        "sharedAppServicePlanName": {
+            "type": "string"
+        },
+        "sharedAppServicePlanResourceGroup": {
+            "type": "string"
+        },
+        "storageAccountName": {
+            "type": "string"
+        },
+        "storageAccountKey": {
+            "type": "securestring"
+        },
+        "subscriptionKey": {
+            "type": "securestring"
+        },
+        "templateBaseUrl": {
+            "type": "string"
+        }
     },
-    "azureMapURL": {
-      "type": "string"
-    },
-    "cosmosDbCollectionId": {
-      "type": "string"
-    },
-    "cosmosDbDatabaseId": {
-      "type": "string"
-    },
-    "cosmosDbEndpoint": {
-      "type": "string"
-    },
-    "cosmosDbKey": {
-      "type": "securestring"
-    },
-    "environmentName": {
-      "type": "string"
-    },
-    "functionAppNames": {
-      "type": "array"
-    },
-    "serviceBusConnectionString": {
-      "type": "string"
-    },
-    "serviceBusQueueName": {
-      "type": "string"
-    },
-    "sharedAppServicePlanName": {
-      "type": "string"
-    },
-    "sharedAppServicePlanResourceGroup": {
-      "type": "string"
-    },
-    "storageAccountName": {
-      "type": "string"
-    },
-    "storageAccountKey": {
-      "type": "securestring"
-    },
-    "subscriptionKey": {
-      "type": "securestring"
-    },
-    "templateBaseUrl": {
-      "type": "string"
-    }
-  },
     "variables": {
         "functionAppTemplateUri": "[concat(parameters('templateBaseUrl'), '/deployments/function-app-resources.json')]",
         "sharedAppServicePlanId": "[resourceId(parameters('sharedAppServicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('sharedAppServicePlanName'))]"
@@ -66,50 +66,50 @@
                     "uri": "[variables('functionAppTemplateUri')]",
                     "contentVersion": "1.0.0.0"
                 },
-              "parameters": {
-                "functionAppName": {
-                  "value": "[parameters('functionAppNames')[copyIndex()]]"
-                },
-                "apiVersion": {
-                  "value": "[parameters('apiVersion')]"
-                },
-                "appServicePlanId": {
-                  "value": "[variables('sharedAppServicePlanId')]"
-                },
-                "azureMapURL": {
-                  "value": "[parameters('azureMapURL')]"
-                },
-                "configEnvironmentName": {
-                  "value": "[parameters('environmentName')]"
-                },
-                "cosmosDbCollectionId": {
-                  "value": "[parameters('cosmosDbCollectionId')]"
-                },
-                "cosmosDbDatabaseId": {
-                  "value": "[parameters('cosmosDbDatabaseId')]"
-                },
-                "cosmosDbEndpoint": {
-                  "value": "[parameters('cosmosDbEndpoint')]"
-                },
-                "cosmosDbKey": {
-                  "value": "[parameters('cosmosDbKey')]"
-                },
-                "serviceBusConnectionString": {
-                  "value": "[parameters('serviceBusConnectionString')]"
-                },
-                "serviceBusQueueName": {
-                  "value": "[parameters('serviceBusQueueName')]"
-                },
-                "storageAccountName": {
-                  "value": "[parameters('storageAccountName')]"
-                },
-                "storageAccountKey": {
-                  "value": "[parameters('storageAccountKey')]"
-                },
-                "subscriptionKey": {
-                  "value": "[parameters('subscriptionKey')]"
+                "parameters": {
+                    "functionAppName": {
+                        "value": "[parameters('functionAppNames')[copyIndex()]]"
+                    },
+                    "apiVersion": {
+                        "value": "[parameters('apiVersion')]"
+                    },
+                    "appServicePlanId": {
+                        "value": "[variables('sharedAppServicePlanId')]"
+                    },
+                    "azureMapURL": {
+                        "value": "[parameters('azureMapURL')]"
+                    },
+                    "configEnvironmentName": {
+                        "value": "[parameters('environmentName')]"
+                    },
+                    "cosmosDbCollectionId": {
+                        "value": "[parameters('cosmosDbCollectionId')]"
+                    },
+                    "cosmosDbDatabaseId": {
+                        "value": "[parameters('cosmosDbDatabaseId')]"
+                    },
+                    "cosmosDbEndpoint": {
+                        "value": "[parameters('cosmosDbEndpoint')]"
+                    },
+                    "cosmosDbKey": {
+                        "value": "[parameters('cosmosDbKey')]"
+                    },
+                    "serviceBusConnectionString": {
+                        "value": "[parameters('serviceBusConnectionString')]"
+                    },
+                    "serviceBusQueueName": {
+                        "value": "[parameters('serviceBusQueueName')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[parameters('storageAccountName')]"
+                    },
+                    "storageAccountKey": {
+                        "value": "[parameters('storageAccountKey')]"
+                    },
+                    "subscriptionKey": {
+                        "value": "[parameters('subscriptionKey')]"
+                    }
                 }
-              }
             },
             "copy": {
                 "name": "FunctionAppCopy",
