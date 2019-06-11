@@ -81,7 +81,7 @@
                             "value": "[variables('storageAccountConnectionString')]"
                         },
                         {
-                            "name": "ApiVersion",
+                            "name": "AzureMapApiVersion",
                             "value": "[parameters('azureMapsApiVersion')]"
                         },
                         {
@@ -129,7 +129,7 @@
                             "value": "sessionChangeFeedPrefix"
                         },
                         {
-                            "name": "SubscriptionKey",
+                            "name": "AzureMapSubscriptionKey",
                             "value": "[parameters('azureMapsSubscriptionKey')]"
                         },
                         {
