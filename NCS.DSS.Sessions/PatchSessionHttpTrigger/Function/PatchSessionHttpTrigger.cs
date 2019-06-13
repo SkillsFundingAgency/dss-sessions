@@ -170,7 +170,8 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
                 try
                 {
-                    position = await geoCodingService.GetPositionForPostcodeAsync(sessionPatchRequest.VenuePostCode);
+                    var postcode = sessionPatchRequest.VenuePostCode.Replace(" ", string.Empty);
+                    position = await geoCodingService.GetPositionForPostcodeAsync(postcode);
                 }
                 catch (Exception e)
                 {
