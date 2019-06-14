@@ -16,9 +16,11 @@ using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using DFC.Functions.DI.Standard.Attributes;
 using DFC.Common.Standard.Logging;
+using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.JSON.Standard;
 using DFC.HTTP.Standard;
 using Microsoft.AspNetCore.Http;
+using NCS.DSS.Sessions.GeoCoding;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 {
@@ -40,7 +42,9 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             [Inject]ILoggerHelper loggerHelper,
             [Inject]IHttpRequestHelper httpRequestHelper,
             [Inject]IHttpResponseMessageHelper httpResponseMessageHelper,
-            [Inject]IJsonHelper jsonHelper)
+            [Inject]IJsonHelper jsonHelper,
+            [Inject]IGeoCodingService geoCodingService)
+            
         {
             loggerHelper.LogMethodEnter(log);
 
@@ -144,6 +148,25 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             {
                 loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Interaction does not exist {0}", interactionGuid));
                 return httpResponseMessageHelper.NoContent(interactionGuid);
+            }
+
+            loggerHelper.LogInformationMessage(log, correlationGuid, "Attempting to get long and lat for postcode");
+            if (!string.IsNullOrEmpty(sessionRequest.VenuePostCode))
+            {
+                Position position;
+
+                try
+                {
+                    var postcode = sessionRequest.VenuePostCode.Replace(" ", string.Empty);
+                    position = await geoCodingService.GetPositionForPostcodeAsync(postcode);
+                }
+                catch (Exception e)
+                {
+                    loggerHelper.LogException(log, correlationGuid, string.Format("Unable to get long and lat for postcode: {0}", sessionRequest.VenuePostCode), e);
+                    throw;
+                }
+
+                sessionRequest.SetLongitudeAndLatitude(position);
             }
 
             loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Create session for customer {0}", customerGuid));

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
+using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
@@ -36,6 +37,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IJsonHelper _jsonHelper;
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
+        private IGeoCodingService _geoCodingService;
         private Models.Session _session;
 
         [SetUp]
@@ -53,6 +55,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _httpResponseMessageHelper = Substitute.For<IHttpResponseMessageHelper>();
             _jsonHelper = Substitute.For<IJsonHelper>();
             _resourceHelper = Substitute.For<IResourceHelper>();
+            _geoCodingService = Substitute.For<IGeoCodingService>();
             _postSessionHttpTriggerService = Substitute.For<IPostSessionHttpTriggerService>();
 
             _httpRequestHelper.GetDssTouchpointId(_request).Returns("0000000001");
@@ -226,7 +229,8 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
                 _loggerHelper,
                 _httpRequestHelper,
                 _httpResponseMessageHelper,
-                _jsonHelper).ConfigureAwait(false);
+                _jsonHelper, 
+                _geoCodingService).ConfigureAwait(false);
         }
 
     }

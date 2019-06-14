@@ -2,20 +2,53 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "templateBaseUrl": {
-            "value": "https://raw.githubusercontent.com/SkillsFundingAgency/cdh-central/master/Resources/"
+        "azureMapsApiVersion": {
+            "value": "__AzureMapsApiVersion__"
+        },
+        "azureMapsSubscriptionKey": {
+            "value": "__AzureMapsSubscriptionKey__"
+        },
+        "azureMapsUrl": {
+            "value": "__AzureMapsUrl__"
+        },
+        "cosmosDbCollectionId": {
+            "value": "__ApiResourceName__"
+        },
+        "cosmosDbDatabaseId": {
+            "value": "__ApiResourceName__"
+        },
+        "cosmosDbEndpoint": {
+            "value": "__CosmosDbEndpoint__"
+        },
+        "cosmosDbKey": {
+            "value": "__CosmosDbKey__"
         },
         "environmentName": {
-            "value": ""
+            "value": "__NotTokenised__"
         },
         "functionAppNames": {
-            "value": []
+            "value": "__NotTokenised__"
+        },
+        "serviceBusConnectionString": {
+            "value": "__ServiceBusConnectionString__"
+        },
+        "serviceBusQueueName": {
+            "value": "__ServiceBusQueueName__"
         },
         "sharedAppServicePlanName": {
-            "value": ""
+            "value": "__SharedAppServicePlanName__"
         },
         "sharedAppServicePlanResourceGroup": {
-            "value": ""
+            "value": "__SharedAppServicePlanResourceGroup__"
+        },
+        "storageAccountName": {
+            "value": "__SharedStorageAccount__"
+        },
+        "storageAccountKey": {
+            "value": "__SharedStorageAccountKey__"
+        },
+        "templateBaseUrl": {
+            "value": "__NestedArmTemplateBaseUrl__"
         }
     }
 }

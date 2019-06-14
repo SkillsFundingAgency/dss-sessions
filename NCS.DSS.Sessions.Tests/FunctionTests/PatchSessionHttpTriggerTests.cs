@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
+using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
@@ -37,6 +38,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IJsonHelper _jsonHelper;
         private IPatchSessionHttpTriggerService _patchSessionHttpTriggerService;
+        private IGeoCodingService _geoCodingService;
         private Session _session;
         private SessionPatch _sessionPatch;
         private string _sessionString;
@@ -58,6 +60,8 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _resourceHelper = Substitute.For<IResourceHelper>();
             _validate = Substitute.For<IValidate>();
             _patchSessionHttpTriggerService = Substitute.For<IPatchSessionHttpTriggerService>();
+            _geoCodingService = Substitute.For<IGeoCodingService>();
+
             _sessionString = JsonConvert.SerializeObject(_session);
 
             _patchSessionHttpTriggerService.PatchResource(Arg.Any<string>(), _sessionPatch).Returns(_sessionString);
@@ -291,7 +295,8 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
                 _loggerHelper,
                 _httpRequestHelper,
                 _httpResponseMessageHelper,
-                _jsonHelper).ConfigureAwait(false);
+                _jsonHelper,
+                _geoCodingService).ConfigureAwait(false);
         }
 
     }
