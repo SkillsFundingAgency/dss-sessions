@@ -58,6 +58,7 @@ namespace NCS.DSS.Sessions.Models
 
         [JsonIgnoreOnSerialize]
         public decimal? Longitude { get; set; }
+        
         [JsonIgnoreOnSerialize]
         public decimal? Latitude { get; set; }
         
@@ -92,6 +93,7 @@ namespace NCS.DSS.Sessions.Models
 
             Longitude = (decimal)position.Lon;
             Latitude = (decimal)position.Lat;
+            
         }
     }
 }
