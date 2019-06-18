@@ -15,7 +15,6 @@ using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Ioc;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
-using NCS.DSS.Sessions.SessionChangeFeedTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 
 [assembly: WebJobsStartup(typeof(WebJobsExtensionStartup), "Web Jobs Extension Startup")]
@@ -42,7 +41,6 @@ namespace NCS.DSS.Sessions.Ioc
             builder.Services.AddTransient<IPostSessionHttpTriggerService, PostSessionHttpTriggerService>();
             builder.Services.AddTransient<IPatchSessionHttpTriggerService, PatchSessionHttpTriggerService>();
             builder.Services.AddTransient<ISessionPatchService, SessionPatchService>();
-            builder.Services.AddTransient<ISessionChangeFeedTriggerService, SessionChangeFeedTriggerService>();
 
             builder.Services.AddScoped<IGeoCodingService, GeoCodingService>();
             builder.Services.AddScoped<IAzureMapService, AzureMapService>();
