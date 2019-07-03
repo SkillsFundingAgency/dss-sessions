@@ -44,6 +44,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         public void Setup()
         {
             _session = Substitute.For<Models.Session>();
+            _session.VenuePostCode = string.Empty;
 
             _request = new DefaultHttpRequest(new DefaultHttpContext());
 
