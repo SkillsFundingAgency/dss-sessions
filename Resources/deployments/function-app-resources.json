@@ -121,24 +121,12 @@
                             "value": "interactions"
                         },
                         {
-                            "name": "LeaseCollectionName",
-                            "value": "session-lease"
-                        },
-                        {
-                            "name": "LeaseCollectionPrefix",
-                            "value": "sessionChangeFeedPrefix"
-                        },
-                        {
                             "name": "AzureMapSubscriptionKey",
                             "value": "[parameters('azureMapsSubscriptionKey')]"
                         },
                         {
                             "name": "ServiceBusConnectionString",
                             "value": "[parameters('serviceBusConnectionString')]"
-                        },
-                        {
-                            "name": "ChangeFeedQueueName",
-                            "value": "dss.changefeedqueue"
                         },
                         {
                             "name": "QueueName",
