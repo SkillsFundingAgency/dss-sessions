@@ -133,7 +133,7 @@
                             "value": "[parameters('serviceBusQueueName')]"
                         },
                         {
-                          "name": "CountrySet",
+                          "name": "AzureCountrySet",
                           "value": "GB"
                         }
                     ]
