@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.IO;
-using System.Net;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Azure.Documents;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using Newtonsoft.Json;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using NUnit.Framework;
+using System;
+using System.Collections.Specialized;
+using System.IO;
+using System.Net;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
 {
@@ -22,8 +22,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     {
         private readonly Guid _sessionId = Guid.Parse("7E467BDB-213F-407A-B86A-1954053D3C24");
         private IPatchSessionHttpTriggerService _sessionPatchHttpTriggerService;
-        private ISessionPatchService _sessionPatchService;
-        private IDocumentDBProvider _documentDbProvider;
+        private Mock<ISessionPatchService> _sessionPatchService;
+        private Mock<IDocumentDBProvider> _documentDbProvider;
         private Session _session;
         private SessionPatch _sessionPatch;
         private string _json;
@@ -31,13 +31,13 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = Substitute.For<IDocumentDBProvider>();
-            _sessionPatchService = Substitute.For<ISessionPatchService>();
-            _sessionPatchHttpTriggerService = Substitute.For<PatchSessionHttpTriggerService>(_documentDbProvider, _sessionPatchService);
-            _session = Substitute.For<Session>();
-            _sessionPatch = Substitute.For<SessionPatch>();
+            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _sessionPatchService = new Mock<ISessionPatchService>();
+            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object);
+            _session = new Session();
+            _sessionPatch = new SessionPatch() { VenuePostCode="B33 9BX" };
             _json = JsonConvert.SerializeObject(_sessionPatch);
-            _sessionPatchService.Patch(_json, _sessionPatch).Returns(_session.ToString());
+            _sessionPatchService.Setup(x=>x.Patch(_json, _sessionPatch)).Returns(_session.ToString());
         }
 
         [Test]
@@ -64,7 +64,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeUpdated()
         {
-            _documentDbProvider.UpdateSessionAsync(Arg.Any<string>(), Arg.Any<Guid>()).ReturnsNull();
+            //Arrange
+            _documentDbProvider.Setup(x=>x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ResourceResponse<Document>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -76,7 +77,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeFound()
         {
-            _documentDbProvider.CreateSessionAsync(_session).Returns(Task.FromResult(new ResourceResponse<Document>(null)).Result);
+            // Arrange
+            _documentDbProvider.Setup(x=>x.CreateSessionAsync(_session)).Returns(Task.FromResult(new ResourceResponse<Document>(null)));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -88,6 +90,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsResourceWhenUpdated()
         {
+            // Arrange
             const string documentServiceResponseClass = "Microsoft.Azure.Documents.DocumentServiceResponse, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
             const string dictionaryNameValueCollectionClass = "Microsoft.Azure.Documents.Collections.DictionaryNameValueCollection, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
@@ -110,7 +113,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
 
             responseField?.SetValue(resourceResponse, documentServiceResponse);
 
-            _documentDbProvider.UpdateSessionAsync(Arg.Any<string>(), Arg.Any<Guid>()).Returns(Task.FromResult(resourceResponse).Result);
+            _documentDbProvider.Setup(x=>x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -124,10 +127,11 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsNullWhenResourceHasNotBeenFound()
         {
-            _documentDbProvider.GetSessionForCustomerToUpdateAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).ReturnsNull();
+            // Arrange
+            _documentDbProvider.Setup(x=>x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
 
             // Act
-            var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>());
+            var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>());
 
             // Assert
             Assert.IsNull(result);
@@ -136,7 +140,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsResourceWhenResourceHasBeenFound()
         {
-            _documentDbProvider.GetSessionForCustomerToUpdateAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(Task.FromResult(_json).Result);
+            // Arrange
+            _documentDbProvider.Setup(x=>x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>());

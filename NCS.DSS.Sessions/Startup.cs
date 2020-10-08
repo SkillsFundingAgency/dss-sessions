@@ -1,32 +1,27 @@
 ﻿using DFC.Common.Standard.Logging;
-using DFC.Functions.DI.Standard;
 using DFC.GeoCoding.Standard.AzureMaps.Service;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using DFC.Swagger.Standard;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Hosting;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using NCS.DSS.Sessions;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
-using NCS.DSS.Sessions.Ioc;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 
-[assembly: WebJobsStartup(typeof(WebJobsExtensionStartup), "Web Jobs Extension Startup")]
-
-namespace NCS.DSS.Sessions.Ioc
+[assembly: FunctionsStartup(typeof(Startup))]
+namespace NCS.DSS.Sessions
 {
-    public class WebJobsExtensionStartup : IWebJobsStartup
+    public class Startup : FunctionsStartup
     {
-        public void Configure(IWebJobsBuilder builder)
+        public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.AddDependencyInjection();
-
             builder.Services.AddSingleton<IResourceHelper, ResourceHelper>();
             builder.Services.AddSingleton<IValidate, Validate>();
             builder.Services.AddSingleton<ILoggerHelper, LoggerHelper>();
@@ -44,7 +39,6 @@ namespace NCS.DSS.Sessions.Ioc
 
             builder.Services.AddScoped<IGeoCodingService, GeoCodingService>();
             builder.Services.AddScoped<IAzureMapService, AzureMapService>();
-
         }
     }
 }

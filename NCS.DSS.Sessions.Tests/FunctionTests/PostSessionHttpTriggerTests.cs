@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using DFC.Common.Standard.Logging;
+﻿using DFC.Common.Standard.Logging;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +13,12 @@ using Newtonsoft.Json;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.FunctionTests
 {
@@ -39,6 +39,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
         private IGeoCodingService _geoCodingService;
         private Models.Session _session;
+        private PostSessionHttpTrigger.Function.PostSessionHttpTrigger _function;
 
         [SetUp]
         public void Setup()
@@ -65,6 +66,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
             _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
+            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_resourceHelper, _validate, _postSessionHttpTriggerService, _loggerHelper, _httpRequestHelper, _httpResponseMessageHelper, _jsonHelper, _geoCodingService);
         }
 
         [Test]
@@ -219,20 +221,11 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
         private async Task<HttpResponseMessage> RunFunction(string customerId, string interactionId)
         {
-            return await PostSessionHttpTrigger.Function.PostSessionHttpTrigger.Run(
+            return await _function.Run(
                 _request, 
                 _log,
                 customerId,
-                interactionId,
-                _resourceHelper,
-                _validate,
-                _postSessionHttpTriggerService,
-                _loggerHelper,
-                _httpRequestHelper,
-                _httpResponseMessageHelper,
-                _jsonHelper, 
-                _geoCodingService).ConfigureAwait(false);
+                interactionId).ConfigureAwait(false);
         }
-
     }
 }

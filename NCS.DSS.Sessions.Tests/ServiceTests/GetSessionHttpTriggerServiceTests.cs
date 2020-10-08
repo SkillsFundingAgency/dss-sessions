@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
 using NSubstitute;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
 {
@@ -13,20 +14,21 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class GetSessionHttpTriggerServiceTests
     {
         private IGetSessionHttpTriggerService _getSessionHttpTriggerService;
-        private IDocumentDBProvider _documentDbProvider;
+        private Mock<IDocumentDBProvider> _documentDbProvider;
         private readonly Guid _customerId = Guid.Parse("58b43e3f-4a50-4900-9c82-a14682ee90fa");
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = Substitute.For<IDocumentDBProvider>();
-            _getSessionHttpTriggerService = Substitute.For<GetSessionHttpTriggerService>(_documentDbProvider);
+            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _getSessionHttpTriggerService = Substitute.For<GetSessionHttpTriggerService>(_documentDbProvider.Object);
         }
 
         [Test]
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsNullWhenResourceCannotBeFound()
         {
-            _documentDbProvider.GetSessionsForCustomerAsync(Arg.Any<Guid>()).Returns(Task.FromResult<List<Models.Session>>(null).Result);
+            //Arrange
+            _documentDbProvider.Setup(x=>x.GetSessionsForCustomerAsync(It.IsAny<Guid>())).Returns(Task.FromResult<List<Models.Session>>(null));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);
@@ -38,7 +40,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsResource()
         {
-            _documentDbProvider.GetSessionsForCustomerAsync(_customerId).Returns(Task.FromResult(new List<Models.Session>()).Result);
+            //Arrange
+            _documentDbProvider.Setup(x=>x.GetSessionsForCustomerAsync(_customerId)).Returns(Task.FromResult(new List<Models.Session>()));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);

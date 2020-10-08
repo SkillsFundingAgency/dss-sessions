@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
+using Moq;
+using NCS.DSS.Sessions.Cosmos.Provider;
+using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
+using NSubstitute;
+using NUnit.Framework;
+using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using NCS.DSS.Sessions.Cosmos.Provider;
-using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
-using NSubstitute;
-using NUnit.Framework;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
 {
@@ -18,14 +19,14 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class PostSessionHttpTriggerServiceTests
     {
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
-        private IDocumentDBProvider _documentDbProvider;
+        private Mock<IDocumentDBProvider> _documentDbProvider;
         private Models.Session _session;
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = Substitute.For<IDocumentDBProvider>();
-            _postSessionHttpTriggerService = Substitute.For<PostSessionHttpTriggerService>(_documentDbProvider);
+            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _postSessionHttpTriggerService = new PostSessionHttpTriggerService(_documentDbProvider.Object);
             _session = Substitute.For<Models.Session>();
         }
 
@@ -42,6 +43,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [Test]
         public async Task PostSessionsHttpTriggerServiceTests_CreateAsync_ReturnsResourceWhenUpdated()
         {
+            //Arrange
             const string documentServiceResponseClass = "Microsoft.Azure.Documents.DocumentServiceResponse, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
             const string dictionaryNameValueCollectionClass = "Microsoft.Azure.Documents.Collections.DictionaryNameValueCollection, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
@@ -64,7 +66,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
 
             responseField?.SetValue(resourceResponse, documentServiceResponse);
 
-            _documentDbProvider.CreateSessionAsync(Arg.Any<Models.Session>()).Returns(Task.FromResult(resourceResponse).Result);
+            _documentDbProvider.Setup(x=>x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse));
 
             // Act
             var result = await _postSessionHttpTriggerService.CreateAsync(_session);
