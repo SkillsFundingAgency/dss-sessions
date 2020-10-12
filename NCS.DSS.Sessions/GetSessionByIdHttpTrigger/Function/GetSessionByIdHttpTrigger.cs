@@ -1,20 +1,19 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using DFC.Common.Standard.Logging;
+using DFC.HTTP.Standard;
+using DFC.JSON.Standard;
+using DFC.Swagger.Standard.Annotations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using System.Net.Http;
-using System.Net;
-using System.Threading.Tasks;
-using System;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
-using DFC.Swagger.Standard.Annotations;
-using Microsoft.AspNetCore.Mvc;
-using DFC.Functions.DI.Standard.Attributes;
-using DFC.HTTP.Standard;
-using DFC.Common.Standard.Logging;
-using DFC.JSON.Standard;
-using Microsoft.AspNetCore.Http;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 {
@@ -49,6 +48,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Get request is malformed", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Unauthorized, Description = "API Key unknown or invalid", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
+        [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "GetByID", Description = "Ability to get by ID; a session object for a given customer.")]
         public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
         {
