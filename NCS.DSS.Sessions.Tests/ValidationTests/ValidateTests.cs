@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using NCS.DSS.Sessions.ReferenceData;
+﻿using NCS.DSS.Sessions.ReferenceData;
 using NCS.DSS.Sessions.Validation;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.Tests.ValidationTests
 {

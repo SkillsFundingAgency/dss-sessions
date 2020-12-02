@@ -1,11 +1,11 @@
-﻿using System;
-using DFC.JSON.Standard;
+﻿using DFC.JSON.Standard;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.ReferenceData;
 using Newtonsoft.Json;
 using NSubstitute;
 using NUnit.Framework;
+using System;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
 {
@@ -21,8 +21,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [SetUp]
         public void Setup()
         {
-            _jsonHelper = Substitute.For<JsonHelper>();
-            _sessionPatchService = Substitute.For<SessionPatchService>(_jsonHelper);
+            _jsonHelper = new JsonHelper();
+            _sessionPatchService = new SessionPatchService(_jsonHelper);
             _sessionPatch = Substitute.For<SessionPatch>();
 
             _json = JsonConvert.SerializeObject(_sessionPatch);

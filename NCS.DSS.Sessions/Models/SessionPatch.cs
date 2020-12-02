@@ -21,7 +21,7 @@ namespace NCS.DSS.Sessions.Models
         public string VenuePostCode { get; set; }
 
         [Display(Description = "Indicator to say whether the session was attended or not")]
-        [Example(Description = "true/false")]
+        [Example(Description = "true")]
         public bool? SessionAttended { get; set; }
 
         [Display(Description = "Reason For Non Attendance reference data.")]

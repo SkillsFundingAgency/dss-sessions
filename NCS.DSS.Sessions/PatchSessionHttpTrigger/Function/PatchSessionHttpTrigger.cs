@@ -1,31 +1,59 @@
-﻿using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net;
-using System.Threading.Tasks;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using NCS.DSS.Sessions.Cosmos.Helper;
-using NCS.DSS.Sessions.Models;
-using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
-using NCS.DSS.Sessions.Validation;
-using DFC.Swagger.Standard.Annotations;
-using Microsoft.AspNetCore.Mvc;
-using DFC.Functions.DI.Standard.Attributes;
-using DFC.Common.Standard.Logging;
+﻿using DFC.Common.Standard.Logging;
 using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
+using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
+using NCS.DSS.Sessions.Models;
+using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
+using NCS.DSS.Sessions.Validation;
+using Newtonsoft.Json;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 {
-    public static class PatchSessionHttpTrigger
+    public class PatchSessionHttpTrigger
     {
+        private IResourceHelper _resourceHelper;
+        private IValidate _validate;
+        private IPatchSessionHttpTriggerService _sessionPatchService;
+        private ILoggerHelper _loggerHelper;
+        private IHttpRequestHelper _httpRequestHelper;
+        private IHttpResponseMessageHelper _httpResponseMessageHelper;
+        private IJsonHelper _jsonHelper;
+        private IGeoCodingService _geoCodingService;
+
+        public PatchSessionHttpTrigger(
+            IResourceHelper resourceHelper,
+            IValidate validate,
+            IPatchSessionHttpTriggerService sessionPatchService,
+            ILoggerHelper loggerHelper,
+            IHttpRequestHelper httpRequestHelper,
+            IHttpResponseMessageHelper httpResponseMessageHelper,
+            IJsonHelper jsonHelper,
+            IGeoCodingService geoCodingService)
+        {
+            _resourceHelper = resourceHelper;
+            _validate = validate;
+            _sessionPatchService = sessionPatchService;
+            _loggerHelper = loggerHelper;
+            _httpRequestHelper = httpRequestHelper;
+            _httpResponseMessageHelper = httpResponseMessageHelper;
+            _jsonHelper = jsonHelper;
+            _geoCodingService = geoCodingService;
+        }
+
         [FunctionName("PATCH")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Patched", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
@@ -35,19 +63,11 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId,
-            [Inject]IResourceHelper resourceHelper,
-            [Inject]IValidate validate,
-            [Inject]IPatchSessionHttpTriggerService sessionPatchService,
-            [Inject]ILoggerHelper loggerHelper,
-            [Inject]IHttpRequestHelper httpRequestHelper,
-            [Inject]IHttpResponseMessageHelper httpResponseMessageHelper,
-            [Inject]IJsonHelper jsonHelper, 
-            [Inject]IGeoCodingService geoCodingService)
+        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
         {
-            loggerHelper.LogMethodEnter(log);
+            _loggerHelper.LogMethodEnter(log);
 
-            var correlationId = httpRequestHelper.GetDssCorrelationId(req);
+            var correlationId = _httpRequestHelper.GetDssCorrelationId(req);
             if (string.IsNullOrEmpty(correlationId))
                 log.LogInformation("Unable to locate 'DssCorrelationId' in request header");
 
@@ -57,113 +77,113 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 correlationGuid = Guid.NewGuid();
             }
 
-            var touchpointId = httpRequestHelper.GetDssTouchpointId(req);
+            var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'TouchpointId' in request header");
-                return httpResponseMessageHelper.BadRequest();
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'TouchpointId' in request header");
+                return _httpResponseMessageHelper.BadRequest();
             }
 
-            var ApimURL = httpRequestHelper.GetDssApimUrl(req);
+            var ApimURL = _httpRequestHelper.GetDssApimUrl(req);
             if (string.IsNullOrEmpty(ApimURL))
             {
                 log.LogInformation("Unable to locate 'apimurl' in request header");
-                return httpResponseMessageHelper.BadRequest();
+                return _httpResponseMessageHelper.BadRequest();
             }
 
-            var subcontractorId = httpRequestHelper.GetDssSubcontractorId(req);
+            var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
             if (string.IsNullOrEmpty(subcontractorId))
-                loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
-            
-            loggerHelper.LogInformationMessage(log, correlationGuid,
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+
+            _loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Patch Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",
                     touchpointId));
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'customerId' to a Guid: {0}", customerId));
-                return httpResponseMessageHelper.BadRequest(customerGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'customerId' to a Guid: {0}", customerId));
+                return _httpResponseMessageHelper.BadRequest(customerGuid);
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'interactionId' to a Guid: {0}", interactionId));
-                return httpResponseMessageHelper.BadRequest(interactionGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'interactionId' to a Guid: {0}", interactionId));
+                return _httpResponseMessageHelper.BadRequest(interactionGuid);
             }
 
             if (!Guid.TryParse(sessionId, out var sessionGuid))
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'sessionId' to a Guid: {0}", sessionGuid));
-                return httpResponseMessageHelper.BadRequest(sessionGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'sessionId' to a Guid: {0}", sessionGuid));
+                return _httpResponseMessageHelper.BadRequest(sessionGuid);
             }
 
             SessionPatch sessionPatchRequest;
 
             try
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to get resource from body of the request");
-                sessionPatchRequest = await httpRequestHelper.GetResourceFromRequest<SessionPatch>(req);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to get resource from body of the request");
+                sessionPatchRequest = await _httpRequestHelper.GetResourceFromRequest<SessionPatch>(req);
             }
             catch (JsonException ex)
             {
-                loggerHelper.LogError(log, correlationGuid, "Unable to retrieve body from req", ex);
-                return httpResponseMessageHelper.UnprocessableEntity(ex);
+                _loggerHelper.LogError(log, correlationGuid, "Unable to retrieve body from req", ex);
+                return _httpResponseMessageHelper.UnprocessableEntity(ex);
             }
 
             if (sessionPatchRequest == null)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, "session patch request is null");
-                return httpResponseMessageHelper.UnprocessableEntity(req);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "session patch request is null");
+                return _httpResponseMessageHelper.UnprocessableEntity(req);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to set id's for session patch");
+            _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to set id's for session patch");
             sessionPatchRequest.SetIds(touchpointId, subcontractorId);
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to validate resource");
-            var errors = validate.ValidateResource(sessionPatchRequest);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to validate resource");
+            var errors = _validate.ValidateResource(sessionPatchRequest);
 
             if (errors != null && errors.Any())
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, "validation errors with resource");
-                return httpResponseMessageHelper.UnprocessableEntity(errors);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "validation errors with resource");
+                return _httpResponseMessageHelper.UnprocessableEntity(errors);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if customer exists {0}", customerGuid));
-            var doesCustomerExist = await resourceHelper.DoesCustomerExist(customerGuid);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if customer exists {0}", customerGuid));
+            var doesCustomerExist = await _resourceHelper.DoesCustomerExist(customerGuid);
 
             if (!doesCustomerExist)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer does not exist {0}", customerGuid));
-                return httpResponseMessageHelper.NoContent(customerGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer does not exist {0}", customerGuid));
+                return _httpResponseMessageHelper.NoContent(customerGuid);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if this is a read only customer {0}", customerGuid));
-            var isCustomerReadOnly = await resourceHelper.IsCustomerReadOnly(customerGuid);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if this is a read only customer {0}", customerGuid));
+            var isCustomerReadOnly = await _resourceHelper.IsCustomerReadOnly(customerGuid);
 
             if (isCustomerReadOnly)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer is read only {0}", customerGuid));
-                return httpResponseMessageHelper.Forbidden(customerGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer is read only {0}", customerGuid));
+                return _httpResponseMessageHelper.Forbidden(customerGuid);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if interaction exists {0}", interactionGuid));
-            var doesInteractionExist = resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if interaction exists {0}", interactionGuid));
+            var doesInteractionExist = _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Interaction does not exist {0}", interactionGuid));
-                return httpResponseMessageHelper.NoContent(interactionGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Interaction does not exist {0}", interactionGuid));
+                return _httpResponseMessageHelper.NoContent(interactionGuid);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to get sessions for customer {0}", customerGuid));
-            var sessionForCustomer = await sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to get sessions for customer {0}", customerGuid));
+            var sessionForCustomer = await _sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
             if (sessionForCustomer == null)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Session does not exist {0}", sessionGuid));
-                return httpResponseMessageHelper.NoContent(sessionGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Session does not exist {0}", sessionGuid));
+                return _httpResponseMessageHelper.NoContent(sessionGuid);
             }
-
+             
             if (!string.IsNullOrEmpty(sessionPatchRequest.VenuePostCode))
             {
                 Position position;
@@ -171,38 +191,38 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 try
                 {
                     var postcode = sessionPatchRequest.VenuePostCode.Replace(" ", string.Empty);
-                    position = await geoCodingService.GetPositionForPostcodeAsync(postcode);
+                    position = await _geoCodingService.GetPositionForPostcodeAsync(postcode);
                 }
                 catch (Exception e)
                 {
-                    loggerHelper.LogException(log, correlationGuid, string.Format("Unable to get long and lat for postcode: {0}", sessionPatchRequest.VenuePostCode), e);
+                    _loggerHelper.LogException(log, correlationGuid, string.Format("Unable to get long and lat for postcode: {0}", sessionPatchRequest.VenuePostCode), e);
                     throw;
                 }
 
                 sessionPatchRequest.SetLongitudeAndLatitude(position);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Patch Session {0}", sessionGuid));
-            var patchedSession = sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Patch Session {0}", sessionGuid));
+            var patchedSession = _sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
 
             if (patchedSession == null)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to Patch Session {0}", sessionGuid));
-                return httpResponseMessageHelper.NoContent(sessionGuid);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to Patch Session {0}", sessionGuid));
+                return _httpResponseMessageHelper.NoContent(sessionGuid);
             }
 
-            loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to update Session {0}", sessionGuid));
-            var updatedSession = await sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
+            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to update Session {0}", sessionGuid));
+            var updatedSession = await _sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
 
             if (updatedSession != null)
             {
-                loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("attempting to send to service bus {0}", sessionGuid));
-                await sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
+                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("attempting to send to service bus {0}", sessionGuid));
+                await _sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
             }
 
             return updatedSession == null ?
-                httpResponseMessageHelper.BadRequest(sessionGuid) :
-                httpResponseMessageHelper.Ok(jsonHelper.SerializeObjectAndRenameIdProperty(updatedSession, "id", "SessionId"));
+                _httpResponseMessageHelper.BadRequest(sessionGuid) :
+                _httpResponseMessageHelper.Ok(_jsonHelper.SerializeObjectAndRenameIdProperty(updatedSession, "id", "SessionId"));
         }
     }
 }

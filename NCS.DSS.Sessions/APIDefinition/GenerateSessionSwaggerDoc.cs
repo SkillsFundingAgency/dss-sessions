@@ -9,19 +9,24 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 
 namespace NCS.DSS.Sessions.APIDefinition
 {
-    public static class GenerateSessionSwaggerDoc
+    public class GenerateSessionSwaggerDoc
     {
         public const string ApiTitle = "Sessions";
         public const string ApiDefinitionName = "API-Definition";
         public const string ApiDefRoute = ApiTitle + "/" + ApiDefinitionName;
         public const string ApiDescription = "To support the Data Collections integration with DSS SubcontractorId has been added as an attribute.";
         public const string ApiVersion = "2.0.0";
+        private ISwaggerDocumentGenerator _swaggerDocumentGenerator;
+
+        public GenerateSessionSwaggerDoc(ISwaggerDocumentGenerator swaggerDocumentGenerator)
+        {
+            _swaggerDocumentGenerator = swaggerDocumentGenerator;
+        }
 
         [FunctionName(ApiDefinitionName)]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ApiDefRoute)]HttpRequest req,
-            [Inject]ISwaggerDocumentGenerator swaggerDocumentGenerator)
+        public HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ApiDefRoute)]HttpRequest req)
         {
-            var swagger = swaggerDocumentGenerator.GenerateSwaggerDocument(req, ApiTitle, ApiDescription,
+            var swagger = _swaggerDocumentGenerator.GenerateSwaggerDocument(req, ApiTitle, ApiDescription,
                 ApiDefinitionName, ApiVersion, Assembly.GetExecutingAssembly());
 
             if (string.IsNullOrEmpty(swagger))
