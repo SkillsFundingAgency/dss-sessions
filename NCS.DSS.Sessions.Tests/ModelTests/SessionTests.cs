@@ -99,5 +99,31 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             // Assert
             Assert.AreEqual("0000000000", session.SubcontractorId);
         }
+
+        [Test]
+        public void SessionsTests_ReasonForNonAttendanceIsSetToUnknown_WhenSetDefaultValuesIsCalled()
+        {
+            // Arrange
+            var session = new Models.Session { LastModifiedDate = DateTime.MaxValue, ReasonForNonAttendance=null, SessionAttended=false };
+
+            // Act
+            session.SetDefaultValues();
+
+            // Assert
+            Assert.AreEqual(ReasonForNonAttendance.NotKnown, session.ReasonForNonAttendance);
+        }
+
+        [Test]
+        public void SessionsTests_ReasonForNonAttendanceIsNotSetToUnknown_WhenSetDefaultValuesIsCalled()
+        {
+            // Arrange
+            var session = new Models.Session { LastModifiedDate = DateTime.MaxValue, ReasonForNonAttendance = ReasonForNonAttendance.Forgot, SessionAttended = false };
+
+            // Act
+            session.SetDefaultValues();
+
+            // Assert
+            Assert.AreEqual(ReasonForNonAttendance.Forgot, session.ReasonForNonAttendance);
+        }
     }
 }
