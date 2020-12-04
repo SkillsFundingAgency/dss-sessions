@@ -74,6 +74,7 @@ namespace NCS.DSS.Sessions.Models
 
             if (ReasonForNonAttendance == null && SessionAttended == false)
                 ReasonForNonAttendance = ReferenceData.ReasonForNonAttendance.NotKnown;
+
         }
 
         public void SetIds(Guid customerId, Guid interactionId, string touchpointId, string subcontractorId)
