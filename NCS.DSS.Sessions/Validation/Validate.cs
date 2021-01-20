@@ -30,6 +30,8 @@ namespace NCS.DSS.Sessions.Validation
             if (sessionResource.ReasonForNonAttendance.HasValue && !Enum.IsDefined(typeof(ReasonForNonAttendance), sessionResource.ReasonForNonAttendance.Value))
                 results.Add(new ValidationResult("Please supply a valid Reason For Non Attendance", new[] { "ReasonForNonAttendance" }));
 
+            if(sessionResource.SessionAttended == true && sessionResource.ReasonForNonAttendance.HasValue)
+                results.Add(new ValidationResult("ReasonForNonAttendance cannot be provided when SessionAttended is true", new[] { "ReasonForNonAttendance" }));
         }
 
     }

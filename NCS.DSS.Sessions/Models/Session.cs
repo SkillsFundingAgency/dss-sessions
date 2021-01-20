@@ -72,8 +72,9 @@ namespace NCS.DSS.Sessions.Models
             if (!LastModifiedDate.HasValue)
                 LastModifiedDate = DateTime.UtcNow;
 
-            if (ReasonForNonAttendance == null)
+            if (ReasonForNonAttendance == null && SessionAttended == false)
                 ReasonForNonAttendance = ReferenceData.ReasonForNonAttendance.NotKnown;
+
         }
 
         public void SetIds(Guid customerId, Guid interactionId, string touchpointId, string subcontractorId)
