@@ -17,7 +17,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
 
             // Assert
             Assert.IsNotNull(session.LastModifiedDate);
-            Assert.AreEqual(ReasonForNonAttendance.NotKnown, session.ReasonForNonAttendance);
+            Assert.IsNull(session.ReasonForNonAttendance);
         }
 
         [Test]
