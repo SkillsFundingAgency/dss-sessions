@@ -71,6 +71,13 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
                 return _httpResponseMessageHelper.BadRequest();
             }
 
+            var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
+            if (string.IsNullOrEmpty(subcontractorId))
+            {
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+                return _httpResponseMessageHelper.BadRequest();
+            }
+
             _loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Get Session By Id C# HTTP trigger function  processed a request. By Touchpoint: {0}",
                     touchpointId));

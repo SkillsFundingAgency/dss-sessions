@@ -85,6 +85,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 return _httpResponseMessageHelper.BadRequest();
             }
 
+
             var ApimURL = _httpRequestHelper.GetDssApimUrl(req);
             if (string.IsNullOrEmpty(ApimURL))
             {
@@ -94,7 +95,10 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
             if (string.IsNullOrEmpty(subcontractorId))
+            {
                 _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+                return _httpResponseMessageHelper.BadRequest();
+            }
 
             _loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Post Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",

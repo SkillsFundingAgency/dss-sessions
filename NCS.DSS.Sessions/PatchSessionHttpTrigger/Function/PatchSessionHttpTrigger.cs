@@ -93,7 +93,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
             if (string.IsNullOrEmpty(subcontractorId))
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+            {
+                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'subcontractorId' in request header");
+                return _httpResponseMessageHelper.BadRequest();
+            }
 
             _loggerHelper.LogInformationMessage(log, correlationGuid,
                 string.Format("Patch Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",
