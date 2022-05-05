@@ -72,7 +72,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             }
 
             var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
-            if (string.IsNullOrEmpty(touchpointId))
+            if (string.IsNullOrEmpty(subcontractorId))
             {
                 _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
                 return _httpResponseMessageHelper.BadRequest();
