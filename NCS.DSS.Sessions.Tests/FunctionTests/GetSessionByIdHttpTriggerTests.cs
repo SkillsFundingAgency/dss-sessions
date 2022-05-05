@@ -23,6 +23,8 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private const string ValidInteractionId = "1e1a555c-9633-4e12-ab28-09ed60d51cb3";
         private const string ValidSessionId = "d5369b9a-6959-4bd3-92fc-1583e72b7e51";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
+        private const string SubcontractorId = "9999999999";
+
 
         private Mock<ILogger> _log;
         private HttpRequest _request;
@@ -62,6 +64,21 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeBadRequest_WhenTouchpointIdIsNotProvided()
         {
             _httpRequestHelper.Setup(x=>x.GetDssTouchpointId(_request)).Returns((string)null);
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
+
+            // Act
+            var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
+
+            // Assert
+            Assert.IsInstanceOf<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+        }
+
+        [Test]
+        public async Task GetSessionByIdHttpTrigger_ReturnsStatusCodeBadRequest_WhenSubcontractorIdIdIsNotProvided()
+        {
+            _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns((string)null);
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -76,6 +93,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
 
             // Act
             var result = await RunFunction(InValidId, ValidInteractionId, ValidSessionId);
@@ -90,6 +108,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
 
             // Act
             var result = await RunFunction(ValidCustomerId, InValidId, ValidSessionId);
@@ -104,6 +123,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, InValidId);
@@ -118,6 +138,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
             _resourceHelper.Setup(x=>x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             // Act
@@ -133,6 +154,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
             _resourceHelper.Setup(x=>x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(false);
 
             // Act
@@ -148,6 +170,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
             _getSessionByIdHttpTriggerService.Setup(x=>x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<Models.Session>(null));
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -162,6 +185,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
+            _httpRequestHelper.Setup(x => x.GetDssSubcontractorId(_request)).Returns(SubcontractorId);
             _getSessionByIdHttpTriggerService.Setup(x=>x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_session));
             _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
