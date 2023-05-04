@@ -49,6 +49,9 @@
         },
         "templateBaseUrl": {
             "value": "__NestedArmTemplateBaseUrl__"
+        },
+        "appInsightsInstrumentationKey": {
+            "value": "__appInsightsInstrumentationKey__" 
         }
     }
 }
