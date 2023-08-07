@@ -6,6 +6,7 @@ using DFC.Swagger.Standard;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
 
 namespace NCS.DSS.Sessions.APIDefinition
 {
@@ -17,10 +18,12 @@ namespace NCS.DSS.Sessions.APIDefinition
         public const string ApiDescription = "To support the Data Collections integration with DSS SubcontractorId has been added as an attribute.";
         public const string ApiVersion = "2.0.0";
         private ISwaggerDocumentGenerator _swaggerDocumentGenerator;
+        private ILogger _logger;
 
-        public GenerateSessionSwaggerDoc(ISwaggerDocumentGenerator swaggerDocumentGenerator)
+        public GenerateSessionSwaggerDoc(ISwaggerDocumentGenerator swaggerDocumentGenerator, ILogger logger)
         {
             _swaggerDocumentGenerator = swaggerDocumentGenerator;
+            _logger = logger;
         }
 
         [FunctionName(ApiDefinitionName)]
@@ -30,7 +33,10 @@ namespace NCS.DSS.Sessions.APIDefinition
                 ApiDefinitionName, ApiVersion, Assembly.GetExecutingAssembly());
 
             if (string.IsNullOrEmpty(swagger))
+            {
+                _logger.LogWarning("GenerateSessionSwaggerDoc HttpStatusCode.NoContent");
                 return new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {

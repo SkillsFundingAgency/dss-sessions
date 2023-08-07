@@ -1,4 +1,5 @@
 ﻿using DFC.JSON.Standard;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.ReferenceData;
@@ -14,6 +15,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class SessionPatchServiceTests
     {
         private IJsonHelper _jsonHelper;
+        private ILogger _logger;
         private SessionPatchService _sessionPatchService;
         private SessionPatch _sessionPatch;
         private string _json;
@@ -22,7 +24,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public void Setup()
         {
             _jsonHelper = new JsonHelper();
-            _sessionPatchService = new SessionPatchService(_jsonHelper);
+            _logger = Substitute.For<ILogger>();
+            _sessionPatchService = new SessionPatchService(_jsonHelper,_logger);
             _sessionPatch = Substitute.For<SessionPatch>();
 
             _json = JsonConvert.SerializeObject(_sessionPatch);

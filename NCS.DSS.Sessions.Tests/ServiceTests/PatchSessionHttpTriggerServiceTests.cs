@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
@@ -12,6 +13,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
@@ -24,8 +26,10 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         private IPatchSessionHttpTriggerService _sessionPatchHttpTriggerService;
         private Mock<ISessionPatchService> _sessionPatchService;
         private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ILogger> _logger;
         private Session _session;
         private SessionPatch _sessionPatch;
+       
         private string _json;
 
         [SetUp]
@@ -33,7 +37,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         {
             _documentDbProvider = new Mock<IDocumentDBProvider>();
             _sessionPatchService = new Mock<ISessionPatchService>();
-            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object);
+            _logger = new Mock<ILogger>();
+            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object, _logger.Object);
             _session = new Session();
             _sessionPatch = new SessionPatch() { VenuePostCode="B33 9BX" };
             _json = JsonConvert.SerializeObject(_sessionPatch);
