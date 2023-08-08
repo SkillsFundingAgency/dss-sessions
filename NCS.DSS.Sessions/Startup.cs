@@ -5,6 +5,7 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Cosmos.Provider;
@@ -39,6 +40,7 @@ namespace NCS.DSS.Sessions
 
             builder.Services.AddScoped<IGeoCodingService, GeoCodingService>();
             builder.Services.AddScoped<IAzureMapService, AzureMapService>();
+            builder.Services.AddScoped<ILogger, ILogger>();
         }
     }
 }
