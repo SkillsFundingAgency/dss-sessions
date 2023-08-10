@@ -12,26 +12,22 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
     {
         private readonly ISessionPatchService _sessionPatchService;
         private readonly IDocumentDBProvider _documentDbProvider;
-        private ILogger _logger;
 
-        public PatchSessionHttpTriggerService(IDocumentDBProvider documentDbProvider, ISessionPatchService sessionPatchService,ILogger logger)
+        public PatchSessionHttpTriggerService(IDocumentDBProvider documentDbProvider, ISessionPatchService sessionPatchService)
         {
             _documentDbProvider = documentDbProvider;
             _sessionPatchService = sessionPatchService;
-            _logger = logger;
         }
 
         public string PatchResource(string sessionJson, SessionPatch sessionPatch)
         {
             if (string.IsNullOrEmpty(sessionJson))
             {
-                _logger.LogInformation("PatchSessionHttpTriggerService sessionJson is null");
                 return null;
             }
 
             if (sessionPatch == null)
             {
-                _logger.LogInformation("PatchSessionHttpTriggerService sessionPatch is null");
                 return null;
             }
 
@@ -46,7 +42,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
         {
             if (string.IsNullOrEmpty(sessionJson))
             {
-                _logger.LogInformation("UpdateCosmosAsync sessionPatch is null");
                 return null;
             }
 
@@ -56,13 +51,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
             if (responseStatusCode == HttpStatusCode.OK)
             {
-                _logger.LogInformation($"PatchSessionHttpTriggerService UpdateCosmosAsync HttpStatusCode.OK");
                 return (dynamic)response.Resource;
             }
             else
             {
-                _logger.LogInformation($"PatchSessionHttpTriggerService UpdateCosmosAsync returning null");
-
                 return null;
             }
         }
@@ -70,7 +62,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
         public async Task<string> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
         {
             var session = await _documentDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
-            _logger.LogInformation($"PatchSessionHttpTriggerService GetSessionForCustomerAsync customerid {customerId} sessionId {sessionId}");
 
             return session;
         }

@@ -65,7 +65,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
         public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
         {
-            _loggerHelper.LogMethodEnter(log);
 
             var correlationId = _httpRequestHelper.GetDssCorrelationId(req);
             if (string.IsNullOrEmpty(correlationId))
