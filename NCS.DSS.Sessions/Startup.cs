@@ -40,7 +40,6 @@ namespace NCS.DSS.Sessions
 
             builder.Services.AddScoped<IGeoCodingService, GeoCodingService>();
             builder.Services.AddScoped<IAzureMapService, AzureMapService>();
-            builder.Services.AddScoped<ILogger, ILogger>();
         }
     }
 }
