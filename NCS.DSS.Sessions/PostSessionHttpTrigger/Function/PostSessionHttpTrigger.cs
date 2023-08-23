@@ -77,100 +77,110 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 log.LogInformation("Unable to parse 'DssCorrelationId' to a Guid");
                 correlationGuid = Guid.NewGuid();
             }
+            
+            log.LogInformation($"DssCorrelationId: [{correlationGuid}]");
 
             var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'TouchpointId' in request header");
-                return _httpResponseMessageHelper.BadRequest();
+                var response =  _httpResponseMessageHelper.BadRequest();
+                log.LogInformation($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
+                return response;
             }
 
             var ApimURL = _httpRequestHelper.GetDssApimUrl(req);
             if (string.IsNullOrEmpty(ApimURL))
             {
-                log.LogInformation("Unable to locate 'apimurl' in request header");
-                return _httpResponseMessageHelper.BadRequest();
+                var response =  _httpResponseMessageHelper.BadRequest();
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'apimurl' in request header");
+                return response;
             }
 
             var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
             if (string.IsNullOrEmpty(subcontractorId))
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'SubcontractorId' in request header");
+                log.LogWarning($"Unable to locate 'SubcontractorId' in request header");
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid,
-                string.Format("Post Session C# HTTP trigger function  processed a request. By Touchpoint: {0}",
-                    touchpointId));
+            log.LogInformation($"Post Session C# HTTP trigger function  processed a request. By Touchpoint: [{touchpointId}]");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'customerId' to a Guid: {0}", customerId));
-                return _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
+                return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'interactionId' to a Guid: {0}", interactionId));
-                return _httpResponseMessageHelper.BadRequest(interactionGuid);
+                var response =  _httpResponseMessageHelper.BadRequest(interactionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
+                return response;
             }
 
             Session sessionRequest;
 
             try
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to get resource from body of the request");
+                log.LogInformation($"Attempt to get resource from body of the request");
                 sessionRequest = await _httpRequestHelper.GetResourceFromRequest<Session>(req);
             }
             catch (JsonException ex)
             {
-                _loggerHelper.LogError(log, correlationGuid, "Unable to retrieve body from req", ex);
-                return _httpResponseMessageHelper.UnprocessableEntity(ex);
+                var response =  _httpResponseMessageHelper.UnprocessableEntity(ex);
+                log.LogError($"Response Status Code: [{response.StatusCode}]. Unable to retrieve body from req", ex);
+                return response;
             }
 
             if (sessionRequest == null)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "session request is null");
-                return _httpResponseMessageHelper.UnprocessableEntity(req);
+                var response =  _httpResponseMessageHelper.UnprocessableEntity(req);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. session request is null");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to set id's for session patch");
+            log.LogInformation($"Attempt to set id's for session patch");
             sessionRequest.SetIds(customerGuid, interactionGuid, touchpointId, subcontractorId);
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempt to validate resource");
+            log.LogInformation($"Attempt to validate resource");
             var errors = _validate.ValidateResource(sessionRequest);
 
             if (errors != null && errors.Any())
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "validation errors with resource");
-                return _httpResponseMessageHelper.UnprocessableEntity(errors);
+                var response =  _httpResponseMessageHelper.UnprocessableEntity(errors);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. validation errors with resource", errors);
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if customer exists {0}", customerGuid));
+            log.LogInformation($"Attempting to see if customer exists [{customerGuid}]");
             var doesCustomerExist = await _resourceHelper.DoesCustomerExist(customerGuid);
 
             if (!doesCustomerExist)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer does not exist {0}", customerGuid));
-                return _httpResponseMessageHelper.NoContent(customerGuid);
+                var response =  _httpResponseMessageHelper.NoContent(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if this is a read only customer {0}", customerGuid));
+            log.LogInformation($"Attempting to see if this is a read only customer [{customerGuid}]");
             var isCustomerReadOnly = await _resourceHelper.IsCustomerReadOnly(customerGuid);
 
             if (isCustomerReadOnly)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer is read only {0}", customerGuid));
-                return _httpResponseMessageHelper.Forbidden(customerGuid);
+                var response =  _httpResponseMessageHelper.Forbidden(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer is read only [{customerGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if interaction exists {0}", interactionGuid));
+            log.LogInformation($"Attempting to see if interaction exists [{interactionGuid}]");
             var doesInteractionExist = _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Interaction does not exist {0}", interactionGuid));
-                return _httpResponseMessageHelper.NoContent(interactionGuid);
+                var response =  _httpResponseMessageHelper.NoContent(interactionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, "Attempting to get long and lat for postcode");
+            log.LogInformation($"Attempting to get long and lat for postcode");
             if (!string.IsNullOrEmpty(sessionRequest.VenuePostCode))
             {
                 Position position;
@@ -182,25 +192,34 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 }
                 catch (Exception e)
                 {
-                    _loggerHelper.LogException(log, correlationGuid, string.Format("Unable to get long and lat for postcode: {0}", sessionRequest.VenuePostCode), e);
+                    log.LogError($"Unable to get long and lat for postcode: [{sessionRequest.VenuePostCode}]", e);
                     throw;
                 }
 
                 sessionRequest.SetLongitudeAndLatitude(position);
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to Create session for customer {0}", customerGuid));
+            log.LogInformation($"Attempting to Create session for customer [{customerGuid}]");
             var session = await _sessionPostService.CreateAsync(sessionRequest);
 
             if (session != null)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("attempting to send to service bus {0}", session.SessionId));
+                log.LogInformation($"Attempting to send to service bus [{session.SessionId}]");
                 await _sessionPostService.SendToServiceBusQueueAsync(session, ApimURL);
             }
 
-            return session == null
-                ? _httpResponseMessageHelper.BadRequest(customerGuid)
-                : _httpResponseMessageHelper.Created(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+            if (session == null)
+            {
+                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Failed to post a session for customer [{customerGuid}]");
+                return response;
+            }
+            else
+            {
+                var response =  _httpResponseMessageHelper.Created(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+                log.LogInformation($"Response Status Code: [{response.StatusCode}]. Successfully posted a session [{session.SessionId}] for customer [{customerGuid}]");
+                return response;
+            }
         }
 
     }

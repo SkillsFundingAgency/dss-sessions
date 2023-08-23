@@ -64,61 +64,75 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
                 correlationGuid = Guid.NewGuid();
             }
 
+            log.LogInformation($"DssCorrelationId: [{correlationGuid}]");
+
+
             var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, "Unable to locate 'TouchpointId' in request header");
-                return _httpResponseMessageHelper.BadRequest();
+                var response =  _httpResponseMessageHelper.BadRequest();
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid,
-                string.Format("Get Session By Id C# HTTP trigger function  processed a request. By Touchpoint: {0}",
-                    touchpointId));
+            log.LogInformation($"Get Session By Id C# HTTP trigger function  processed a request. By Touchpoint:[{touchpointId}]");
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'customerId' to a Guid: {0}", customerId));
-                return _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
+                return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'interactionId' to a Guid: {0}", interactionId));
-                return _httpResponseMessageHelper.BadRequest(interactionGuid);
+                var response =  _httpResponseMessageHelper.BadRequest(interactionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
+                return response;
             }
 
             if (!Guid.TryParse(sessionId, out var sessionGuid))
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Unable to parse 'sessionId' to a Guid: {0}", sessionGuid));
-                return _httpResponseMessageHelper.BadRequest(sessionGuid);
+                var response =  _httpResponseMessageHelper.BadRequest(sessionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'sessionId' to a Guid: [{sessionGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if customer exists {0}", customerGuid));
+            log.LogInformation($"Attempting to see if customer exists [{customerGuid}]");
             var doesCustomerExist = await _resourceHelper.DoesCustomerExist(customerGuid);
 
             if (!doesCustomerExist)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Customer does not exist {0}", customerGuid));
-                return _httpResponseMessageHelper.NoContent(customerGuid);
+                var response =  _httpResponseMessageHelper.NoContent(customerGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to see if interaction exists {0}", interactionGuid));
+            log.LogInformation($"Attempting to see if interaction exists [{interactionGuid}]");
             var doesInteractionExist = _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
-                _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Interaction does not exist {0}", interactionGuid));
-                return _httpResponseMessageHelper.NoContent(interactionGuid);
+                var response =  _httpResponseMessageHelper.NoContent(interactionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
+                return response;
             }
 
-            _loggerHelper.LogInformationMessage(log, correlationGuid, string.Format("Attempting to get sessions for customer {0}", customerGuid));
+            log.LogInformation($"Attempting to get sessions for customer [{customerGuid}]");
             var session = await _sessionGetService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
-            _loggerHelper.LogMethodExit(log);
-
-            return session == null ?
-                _httpResponseMessageHelper.NoContent(sessionGuid) :
-                _httpResponseMessageHelper.Ok(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+            if (session == null)
+            {
+                var response =  _httpResponseMessageHelper.NoContent(sessionGuid);
+                log.LogWarning($"Response Status Code: [{response.StatusCode}]. Session does not exist [{sessionGuid}]");
+                return response;
+            }
+            else
+            {
+                var response =  _httpResponseMessageHelper.Ok(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+                log.LogInformation($"Response Status Code: [{response.StatusCode}]. Get session succeeded [{sessionGuid}]");
+                return response;
+            }
         }
 
     }

@@ -12,6 +12,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
@@ -26,6 +27,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         private Mock<IDocumentDBProvider> _documentDbProvider;
         private Session _session;
         private SessionPatch _sessionPatch;
+       
         private string _json;
 
         [SetUp]
