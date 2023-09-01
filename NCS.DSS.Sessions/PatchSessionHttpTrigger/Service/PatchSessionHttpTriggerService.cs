@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.ServiceBus;
@@ -21,10 +22,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
         public string PatchResource(string sessionJson, SessionPatch sessionPatch)
         {
             if (string.IsNullOrEmpty(sessionJson))
+            {
                 return null;
+            }
 
             if (sessionPatch == null)
+            {
                 return null;
+            }
 
             sessionPatch.SetDefaultValues();
 
@@ -36,13 +41,22 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
         public async Task<Session> UpdateCosmosAsync(string sessionJson, Guid sessionId)
         {
             if (string.IsNullOrEmpty(sessionJson))
+            {
                 return null;
+            }
 
             var response = await _documentDbProvider.UpdateSessionAsync(sessionJson, sessionId);
 
             var responseStatusCode = response?.StatusCode;
 
-            return responseStatusCode == HttpStatusCode.OK ? (dynamic)response.Resource : null;
+            if (responseStatusCode == HttpStatusCode.OK)
+            {
+                return (dynamic)response.Resource;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<string> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
