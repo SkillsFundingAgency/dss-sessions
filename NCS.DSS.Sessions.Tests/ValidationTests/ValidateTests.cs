@@ -1,6 +1,8 @@
 ﻿using NCS.DSS.Sessions.ReferenceData;
 using NCS.DSS.Sessions.Validation;
+using NuGet.Frameworks;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,15 +13,21 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
     [TestFixture]
     public class ValidateTests
     {
-        
+        private IValidate _validate;
+
+        [SetUp]
+        public void Setup()
+        {
+            _validate = new Validate();
+        }
+
+
         [Test]
         public void ValidateTests_ReturnValidationResult_WhenSessionsIsNotSuppliedForPost()
         {
-            var diversity = new Models.Session();
+            var session = new Models.Session();
 
-            var validation = new Validate();
-
-            var result = validation.ValidateResource(diversity);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
@@ -30,11 +38,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
         [Test]
         public void ValidateTests_ReturnValidationResult_WhenDateandTimeOfSessionIsNotSuppliedForPost()
         {
-            var diversity = new Models.Session();
+            var session = new Models.Session();
 
-            var validation = new Validate();
-
-            var result = validation.ValidateResource(diversity);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
@@ -45,34 +51,31 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
         [Test]
         public void ValidateTests_ReturnValidationResult_WhenReasonForNonAttendanceIsNotValid()
         {
-            var diversity = new Models.Session
+            var session = new Models.Session
             {
                 DateandTimeOfSession = DateTime.UtcNow,
-                ReasonForNonAttendance = (ReasonForNonAttendance) 100
+                ReasonForNonAttendance = (ReasonForNonAttendance)100
             };
 
-            var validation = new Validate();
 
-            var result = validation.ValidateResource(diversity);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
         }
-        
+
         [Test]
         public void ValidateTests_ReturnValidationResult_WhenLastModifiedDateIsInTheFuture()
         {
-            var diversity = new Models.Session
+            var session = new Models.Session
             {
                 DateandTimeOfSession = DateTime.UtcNow,
                 LastModifiedDate = DateTime.MaxValue
             };
 
-            var validation = new Validate();
-
-            var result = validation.ValidateResource(diversity);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
@@ -84,20 +87,87 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
         public void ValidateTests_ReturnValidationResult_WhenReasonForNonAttendanceIsProvidedWhenASessionAttended()
         {
             // Arrange
-            var diversity = new Models.Session
+            var session = new Models.Session
             {
                 ReasonForNonAttendance = ReasonForNonAttendance.NotKnown,
                 SessionAttended = true
             };
-            var validation = new Validate();
 
             // Act 
-            var result = validation.ValidateResource(diversity);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
             Assert.IsNotNull(result);
-            Assert.That(result.Any(x=> x.ErrorMessage == "ReasonForNonAttendance cannot be provided when SessionAttended is true"));
+            Assert.That(result.Any(x => x.ErrorMessage == "ReasonForNonAttendance cannot be provided when SessionAttended is true"));
+        }
+
+        [Test]
+        public void ValidateTests_ReturnValidationResult_WhenLastModifiedTouchpointIdIsValidForPost()
+        {
+            var session = new Models.Session
+            {
+                LastModifiedTouchpointId = "0000000001", 
+                DateandTimeOfSession = DateTime.UtcNow
+                
+            };
+
+            var result = _validate.ValidateResource(session);
+
+            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.IsNotNull(result);
+            Assert.That(result.Count.Equals(0));
+        }
+
+        [Test]
+        public void ValidateTests_ReturnValidationResult_WhenLastModifiedTouchpointIdIsInvalidForPost()
+        {
+            var session = new Models.Session
+            {
+                LastModifiedTouchpointId = "000000000A",
+                DateandTimeOfSession = DateTime.UtcNow
+
+            };
+
+            var result = _validate.ValidateResource(session);
+
+            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.IsNotNull(result);
+            Assert.That(result.Count.Equals(1));
+        }
+
+        [Test]
+        public void ValidateTests_ReturnValidationResult_WhenSubcontractorIdIsValidForPost()
+        {
+            var session = new Models.Session
+            {
+                LastModifiedTouchpointId = "0000000001",
+                DateandTimeOfSession = DateTime.UtcNow, 
+                SubcontractorId = "01234567899876543210"
+            };
+
+            var result = _validate.ValidateResource(session);
+
+            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.IsNotNull(result);
+            Assert.That(result.Count.Equals(0));
+        }
+
+        [Test]
+        public void ValidateTests_ReturnValidationResult_WhenSubcontractorIdIsInvalidForPost()
+        {
+            var session = new Models.Session
+            {
+                LastModifiedTouchpointId = "0000000001",
+                DateandTimeOfSession = DateTime.UtcNow,
+                SubcontractorId = "0123[]6789!£6543210"
+            };
+
+            var result = _validate.ValidateResource(session);
+
+            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.IsNotNull(result);
+            Assert.That(result.Count.Equals(1));
         }
 
         public void ValidateTests_DoesNotReturnValidationResult_WhenReasonForNonAttendanceIsProvidedWhenASessionAttendedIsNull()
@@ -108,10 +178,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
                 ReasonForNonAttendance = ReasonForNonAttendance.NotKnown,
                 SessionAttended = null
             };
-            var validation = new Validate();
 
             // Act 
-            var result = validation.ValidateResource(session);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
@@ -126,10 +195,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
                 ReasonForNonAttendance = ReasonForNonAttendance.NotKnown,
                 SessionAttended = false
             };
-            var validation = new Validate();
 
             // Act 
-            var result = validation.ValidateResource(session);
+            var result = _validate.ValidateResource(session);
 
             // Assert
             Assert.IsInstanceOf<List<ValidationResult>>(result);
