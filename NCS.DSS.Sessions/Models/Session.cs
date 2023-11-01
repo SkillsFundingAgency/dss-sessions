@@ -47,11 +47,13 @@ namespace NCS.DSS.Sessions.Models
         public DateTime? LastModifiedDate { get; set; }
 
         [StringLength(10, MinimumLength = 10)]
+        [RegularExpression(@"^[0-9]+$")]
         [Display(Description = "Identifier of the touchpoint who made the last change to the record")]
         [Example(Description = "0000000001")]
         public string LastModifiedTouchpointId { get; set; }
 
         [StringLength(50)]
+        [RegularExpression(@"^[0-9]+$")]
         [Display(Description = "Identifier supplied by the touchpoint to indicate their subcontractor")]
         [Example(Description = "01234567899876543210")]
         public string SubcontractorId { get; set; }
