@@ -49,6 +49,12 @@
         },
         "templateBaseUrl": {
             "type": "string"
+        },
+        "workspaceName": {
+        "type": "string"
+        },
+        "workspaceResourceGroup": {
+        "type": "string"
         }
     },
     "variables": {
@@ -108,6 +114,9 @@
                     },
                     "storageAccountKey": {
                         "value": "[parameters('storageAccountKey')]"
+                    },
+                    "workspaceId": {
+                        "value": "[resourceId(parameters('workspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
                     }
                 }
             },
