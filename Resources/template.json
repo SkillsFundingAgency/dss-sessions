@@ -51,10 +51,10 @@
             "type": "string"
         },
         "workspaceName": {
-        "type": "string"
+            "type": "string"
         },
         "workspaceResourceGroup": {
-        "type": "string"
+            "type": "string"
         }
     },
     "variables": {
