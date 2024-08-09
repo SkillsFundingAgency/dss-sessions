@@ -5,8 +5,6 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
@@ -15,6 +13,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
 {
@@ -43,7 +42,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
             _jsonHelper = jsonHelper;
         }
 
-        [FunctionName("GET")]
+        [Function("GET")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Retrieved", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Get request is malformed", ShowSchema = false)]
@@ -51,7 +50,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "Get", Description = "Ability to get a session object for a given customer.")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions")]HttpRequest req, ILogger log, string customerId, string interactionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions")]HttpRequest req, ILogger log, string customerId, string interactionId)
         {
             _loggerHelper.LogMethodEnter(log);
 

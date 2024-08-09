@@ -5,8 +5,6 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
@@ -20,6 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 {
@@ -54,7 +53,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             _geoCodingService = geoCodingService;
         }
 
-        [FunctionName("PATCH")]
+        [Function("PATCH")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Patched", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Patch request is malformed", ShowSchema = false)]
@@ -63,7 +62,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
         {
 
             var correlationId = _httpRequestHelper.GetDssCorrelationId(req);

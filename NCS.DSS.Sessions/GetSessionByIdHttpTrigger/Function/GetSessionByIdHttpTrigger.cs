@@ -4,8 +4,6 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
@@ -14,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 {
@@ -42,7 +41,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             _jsonHelper = jsonHelper;
         }
 
-        [FunctionName("GETByID")]
+        [Function("GETByID")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Retrieved", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Get request is malformed", ShowSchema = false)]
@@ -50,7 +49,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "GetByID", Description = "Ability to get by ID; a session object for a given customer.")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
         {
             _loggerHelper.LogMethodEnter(log);
 

@@ -6,8 +6,6 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
@@ -21,6 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 {
@@ -54,7 +53,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             _geoCodingService = geoCodingService;
         }
 
-        [FunctionName("POST")]
+        [Function("POST")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Added", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Post request is malformed", ShowSchema = false)]
@@ -63,7 +62,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         [Response(HttpStatusCode = 422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 201)]
         [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, ILogger log, string customerId, string interactionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, ILogger log, string customerId, string interactionId)
 
         {
             _loggerHelper.LogMethodEnter(log);

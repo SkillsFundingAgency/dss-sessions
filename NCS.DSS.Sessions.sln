@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCS.DSS.Sessions", "NCS.DSS.Sessions\NCS.DSS.Sessions.csproj", "{2AF73CED-15D3-4026-AA35-7F26EE1135AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCS.DSS.Sessions.Tests", "NCS.DSS.Sessions.Tests\NCS.DSS.Sessions.Tests.csproj", "{D3BA7F93-66C7-444C-AC4B-DB5B78E850E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCS.DSS.Sessions.Tests", "NCS.DSS.Sessions.Tests\NCS.DSS.Sessions.Tests.csproj", "{D3BA7F93-66C7-444C-AC4B-DB5B78E850E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
