@@ -28,27 +28,27 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsNullWhenResourceCannotBeFound()
         {
             //Arrange
-            _documentDbProvider.Setup(x=>x.GetSessionsForCustomerAsync(It.IsAny<Guid>())).Returns(Task.FromResult<List<Models.Session>>(null));
+            _documentDbProvider.Setup(x => x.GetSessionsForCustomerAsync(It.IsAny<Guid>())).Returns(Task.FromResult<List<Models.Session>>(null));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsResource()
         {
             //Arrange
-            _documentDbProvider.Setup(x=>x.GetSessionsForCustomerAsync(_customerId)).Returns(Task.FromResult(new List<Models.Session>()));
+            _documentDbProvider.Setup(x => x.GetSessionsForCustomerAsync(_customerId)).Returns(Task.FromResult(new List<Models.Session>()));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOf<List<Models.Session>>(result);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<List<Models.Session>>());
         }
     }
 }

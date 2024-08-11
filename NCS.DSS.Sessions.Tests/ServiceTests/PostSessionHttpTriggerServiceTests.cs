@@ -37,7 +37,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var result = await _postSessionHttpTriggerService.CreateAsync(null);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
@@ -66,14 +66,14 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
 
             responseField?.SetValue(resourceResponse, documentServiceResponse);
 
-            _documentDbProvider.Setup(x=>x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse));
+            _documentDbProvider.Setup(x => x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse));
 
             // Act
             var result = await _postSessionHttpTriggerService.CreateAsync(_session);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOf<Models.Session>(result);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<Models.Session>());
 
         }
     }

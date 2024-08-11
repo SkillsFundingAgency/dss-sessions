@@ -4,15 +4,15 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 {
@@ -24,6 +24,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
         private IHttpRequestHelper _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IJsonHelper _jsonHelper;
+        private ILogger log;
 
         public GetSessionByIdHttpTrigger(
             IResourceHelper resourceHelper,
@@ -31,7 +32,8 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             ILoggerHelper loggerHelper,
             IHttpRequestHelper httpRequestHelper,
             IHttpResponseMessageHelper httpResponseMessageHelper,
-            IJsonHelper jsonHelper)
+            IJsonHelper jsonHelper,
+            ILogger<GetSessionByIdHttpTrigger> log)
         {
             _resourceHelper = resourceHelper;
             _sessionGetService = sessionGetService;
@@ -39,6 +41,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             _httpRequestHelper = httpRequestHelper;
             _httpResponseMessageHelper = httpResponseMessageHelper;
             _jsonHelper = jsonHelper;
+            this.log = log;
         }
 
         [Function("GETByID")]
@@ -49,7 +52,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
         [Response(HttpStatusCode = (int)HttpStatusCode.Forbidden, Description = "Insufficient Access To This Resource", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "GetByID", Description = "Ability to get by ID; a session object for a given customer.")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, string customerId, string interactionId, string sessionId)
         {
             _loggerHelper.LogMethodEnter(log);
 
@@ -69,7 +72,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
             var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                var response =  _httpResponseMessageHelper.BadRequest();
+                var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
                 return response;
             }
@@ -78,21 +81,21 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response = new BadRequestObjectResult(customerGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                var response =  _httpResponseMessageHelper.BadRequest(interactionGuid);
+                var response = new BadRequestObjectResult(interactionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
                 return response;
             }
 
             if (!Guid.TryParse(sessionId, out var sessionGuid))
             {
-                var response =  _httpResponseMessageHelper.BadRequest(sessionGuid);
+                var response = new BadRequestObjectResult(sessionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'sessionId' to a Guid: [{sessionGuid}]");
                 return response;
             }
@@ -102,7 +105,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 
             if (!doesCustomerExist)
             {
-                var response =  _httpResponseMessageHelper.NoContent(customerGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
                 return response;
             }
@@ -112,7 +115,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 
             if (!doesInteractionExist)
             {
-                var response =  _httpResponseMessageHelper.NoContent(interactionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
                 return response;
             }
@@ -122,13 +125,16 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
 
             if (session == null)
             {
-                var response =  _httpResponseMessageHelper.NoContent(sessionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Session does not exist [{sessionGuid}]");
                 return response;
             }
             else
             {
-                var response =  _httpResponseMessageHelper.Ok(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+                var response = new JsonResult(session, new JsonSerializerOptions())
+                {
+                    StatusCode = (int)HttpStatusCode.OK
+                };
                 log.LogInformation($"Response Status Code: [{response.StatusCode}]. Get session succeeded [{sessionGuid}]");
                 return response;
             }

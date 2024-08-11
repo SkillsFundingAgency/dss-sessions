@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NCS.DSS.Sessions.Models;
+﻿using NCS.DSS.Sessions.Models;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {

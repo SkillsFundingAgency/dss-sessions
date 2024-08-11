@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using NCS.DSS.Sessions.Models;
+﻿using NCS.DSS.Sessions.Models;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
 {

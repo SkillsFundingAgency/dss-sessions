@@ -1,6 +1,6 @@
 ﻿
-using System;
 using Microsoft.Azure.Documents.Client;
+using System;
 
 namespace NCS.DSS.Sessions.Cosmos.Helper
 {
@@ -30,7 +30,7 @@ namespace NCS.DSS.Sessions.Cosmos.Helper
 
             return _documentCollectionUri;
         }
-        
+
         public static Uri CreateDocumentUri(Guid sessionId)
         {
             return UriFactory.CreateDocumentUri(DatabaseId, CollectionId, sessionId.ToString());

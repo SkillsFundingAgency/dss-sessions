@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
+using System;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
 
 namespace NCS.DSS.Sessions.ServiceBus
 {

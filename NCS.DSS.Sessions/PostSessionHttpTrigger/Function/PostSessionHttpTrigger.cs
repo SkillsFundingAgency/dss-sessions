@@ -1,25 +1,24 @@
 ﻿using DFC.Common.Standard.Logging;
-using DFC.Functions.DI.Standard.Attributes;
 using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
+using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
-using Newtonsoft.Json;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Azure.Functions.Worker;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 {
@@ -33,6 +32,8 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IJsonHelper _jsonHelper;
         private IGeoCodingService _geoCodingService;
+        private IDynamicHelper _dynamicHelper;
+        private ILogger log;
 
         public PostSessionHttpTrigger(IResourceHelper resourceHelper,
             IValidate validate,
@@ -41,7 +42,9 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             IHttpRequestHelper httpRequestHelper,
             IHttpResponseMessageHelper httpResponseMessageHelper,
             IJsonHelper jsonHelper,
-            IGeoCodingService geoCodingService)
+            IGeoCodingService geoCodingService,
+            IDynamicHelper dynamicHelper,
+            ILogger log)
         {
             _resourceHelper = resourceHelper;
             _validate = validate;
@@ -51,6 +54,8 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             _httpResponseMessageHelper = httpResponseMessageHelper;
             _jsonHelper = jsonHelper;
             _geoCodingService = geoCodingService;
+            _dynamicHelper = dynamicHelper;
+            this.log = log;
         }
 
         [Function("POST")]
@@ -62,7 +67,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         [Response(HttpStatusCode = 422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 201)]
         [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, ILogger log, string customerId, string interactionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, string customerId, string interactionId)
 
         {
             _loggerHelper.LogMethodEnter(log);
@@ -76,13 +81,13 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 log.LogInformation("Unable to parse 'DssCorrelationId' to a Guid");
                 correlationGuid = Guid.NewGuid();
             }
-            
+
             log.LogInformation($"DssCorrelationId: [{correlationGuid}]");
 
             var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                var response =  _httpResponseMessageHelper.BadRequest();
+                var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 log.LogInformation($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
                 return response;
             }
@@ -90,7 +95,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             var ApimURL = _httpRequestHelper.GetDssApimUrl(req);
             if (string.IsNullOrEmpty(ApimURL))
             {
-                var response =  _httpResponseMessageHelper.BadRequest();
+                var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'apimurl' in request header");
                 return response;
             }
@@ -103,14 +108,14 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response = new BadRequestObjectResult(customerGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                var response =  _httpResponseMessageHelper.BadRequest(interactionGuid);
+                var response = new BadRequestObjectResult(interactionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
                 return response;
             }
@@ -122,16 +127,16 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 log.LogInformation($"Attempt to get resource from body of the request");
                 sessionRequest = await _httpRequestHelper.GetResourceFromRequest<Session>(req);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
-                var response =  _httpResponseMessageHelper.UnprocessableEntity(ex);
+                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite"]));
                 log.LogError($"Response Status Code: [{response.StatusCode}]. Unable to retrieve body from req", ex);
                 return response;
             }
 
             if (sessionRequest == null)
             {
-                var response =  _httpResponseMessageHelper.UnprocessableEntity(req);
+                var response = new UnprocessableEntityObjectResult(req);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. session request is null");
                 return response;
             }
@@ -144,7 +149,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (errors != null && errors.Any())
             {
-                var response =  _httpResponseMessageHelper.UnprocessableEntity(errors);
+                var response = new UnprocessableEntityObjectResult(errors);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. validation errors with resource", errors);
                 return response;
             }
@@ -154,7 +159,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (!doesCustomerExist)
             {
-                var response =  _httpResponseMessageHelper.NoContent(customerGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
                 return response;
             }
@@ -164,7 +169,10 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (isCustomerReadOnly)
             {
-                var response =  _httpResponseMessageHelper.Forbidden(customerGuid);
+                var response = new ObjectResult(customerGuid.ToString())
+                {
+                    StatusCode = (int)HttpStatusCode.Forbidden
+                };
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer is read only [{customerGuid}]");
                 return response;
             }
@@ -174,7 +182,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (!doesInteractionExist)
             {
-                var response =  _httpResponseMessageHelper.NoContent(interactionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
                 return response;
             }
@@ -209,13 +217,16 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             if (session == null)
             {
-                var response =  _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response = new BadRequestObjectResult(customerGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Failed to post a session for customer [{customerGuid}]");
                 return response;
             }
             else
             {
-                var response =  _httpResponseMessageHelper.Created(_jsonHelper.SerializeObjectAndRenameIdProperty(session, "id", "SessionId"));
+                var response = new JsonResult(session, new JsonSerializerOptions())
+                {
+                    StatusCode = (int)HttpStatusCode.Created
+                };
                 log.LogInformation($"Response Status Code: [{response.StatusCode}]. Successfully posted a session [{session.SessionId}] for customer [{customerGuid}]");
                 return response;
             }

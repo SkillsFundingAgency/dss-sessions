@@ -12,7 +12,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
@@ -27,7 +26,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         private Mock<IDocumentDBProvider> _documentDbProvider;
         private Session _session;
         private SessionPatch _sessionPatch;
-       
+
         private string _json;
 
         [SetUp]
@@ -37,9 +36,9 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             _sessionPatchService = new Mock<ISessionPatchService>();
             _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object);
             _session = new Session();
-            _sessionPatch = new SessionPatch() { VenuePostCode="B33 9BX" };
+            _sessionPatch = new SessionPatch() { VenuePostCode = "B33 9BX" };
             _json = JsonConvert.SerializeObject(_sessionPatch);
-            _sessionPatchService.Setup(x=>x.Patch(_json, _sessionPatch)).Returns(_session.ToString());
+            _sessionPatchService.Setup(x => x.Patch(_json, _sessionPatch)).Returns(_session.ToString());
         }
 
         [Test]
@@ -49,7 +48,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var result = _sessionPatchHttpTriggerService.PatchResource(null, Arg.Any<SessionPatch>());
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
 
@@ -60,33 +59,33 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var result = _sessionPatchHttpTriggerService.PatchResource(Arg.Any<string>(), null);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeUpdated()
         {
             //Arrange
-            _documentDbProvider.Setup(x=>x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ResourceResponse<Document>>(null));
+            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ResourceResponse<Document>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x=>x.CreateSessionAsync(_session)).Returns(Task.FromResult(new ResourceResponse<Document>(null)));
+            _documentDbProvider.Setup(x => x.CreateSessionAsync(_session)).Returns(Task.FromResult(new ResourceResponse<Document>(null)));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
@@ -115,14 +114,14 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
 
             responseField?.SetValue(resourceResponse, documentServiceResponse);
 
-            _documentDbProvider.Setup(x=>x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse));
+            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOf<Session>(result);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<Session>());
 
         }
 
@@ -130,27 +129,27 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsNullWhenResourceHasNotBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x=>x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
+            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>());
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsResourceWhenResourceHasBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x=>x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
+            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>());
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOf<string>(result);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<string>());
         }
     }
 
