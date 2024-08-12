@@ -12,7 +12,7 @@ namespace NCS.DSS.Sessions.GeoCoding
 
         private readonly IAzureMapService _azureMapService;
 
-        public GeoCodingService(IAzureMapService azureMapService, ILogger logger)
+        public GeoCodingService(IAzureMapService azureMapService, ILogger<GeoCodingService> logger)
         {
             _logger = logger;
             _azureMapService = azureMapService;

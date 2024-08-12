@@ -34,9 +34,9 @@ var host = new HostBuilder()
         services.AddTransient<IPostSessionHttpTriggerService, PostSessionHttpTriggerService>();
         services.AddTransient<IPatchSessionHttpTriggerService, PatchSessionHttpTriggerService>();
         services.AddTransient<ISessionPatchService, SessionPatchService>();
-
-        services.AddScoped<IGeoCodingService, GeoCodingService>();
         services.AddScoped<IAzureMapService, AzureMapService>();
+        services.AddScoped<IGeoCodingService, GeoCodingService>();
+        
         services.AddSingleton<IDynamicHelper, DynamicHelper>();
     })
     .Build();

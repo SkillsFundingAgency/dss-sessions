@@ -44,7 +44,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             IJsonHelper jsonHelper,
             IGeoCodingService geoCodingService,
             IDynamicHelper dynamicHelper,
-            ILogger log)
+            ILogger<PostSessionHttpTrigger> log)
         {
             _resourceHelper = resourceHelper;
             _validate = validate;
