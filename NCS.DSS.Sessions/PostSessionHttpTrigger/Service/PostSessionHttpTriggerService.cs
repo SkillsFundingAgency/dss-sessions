@@ -2,7 +2,6 @@
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.ServiceBus;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
 {

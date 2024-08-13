@@ -1,6 +1,4 @@
 ﻿using NCS.DSS.Sessions.Cosmos.Provider;
-using System;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Cosmos.Helper
 {

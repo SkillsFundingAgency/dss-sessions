@@ -1,5 +1,4 @@
 ﻿using NCS.DSS.Sessions.Models;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.Validation

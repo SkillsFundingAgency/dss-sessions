@@ -2,7 +2,6 @@
 using DFC.JSON.Standard.Attributes;
 using DFC.Swagger.Standard.Annotations;
 using NCS.DSS.Sessions.ReferenceData;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.Models
