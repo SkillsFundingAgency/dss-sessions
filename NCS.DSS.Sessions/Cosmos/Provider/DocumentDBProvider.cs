@@ -5,10 +5,6 @@ using NCS.DSS.Sessions.Cosmos.Client;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.Models;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Cosmos.Provider
 {

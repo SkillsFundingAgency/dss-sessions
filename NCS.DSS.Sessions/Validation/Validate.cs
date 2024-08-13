@@ -1,7 +1,5 @@
 ﻿using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.ReferenceData;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.Validation

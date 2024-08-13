@@ -1,7 +1,6 @@
 ﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.GeoCoding.Standard.AzureMaps.Service;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.GeoCoding
 {
