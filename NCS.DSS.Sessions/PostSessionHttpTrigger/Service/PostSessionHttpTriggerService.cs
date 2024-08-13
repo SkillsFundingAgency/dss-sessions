@@ -1,8 +1,8 @@
-﻿using System.Net;
-using System.Threading.Tasks;
-using NCS.DSS.Sessions.Cosmos.Provider;
+﻿using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.ServiceBus;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
 {
@@ -10,7 +10,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
     {
 
         private readonly IDocumentDBProvider _documentDbProvider;
-    
+
         public PostSessionHttpTriggerService(IDocumentDBProvider documentDbProvider)
         {
             _documentDbProvider = documentDbProvider;

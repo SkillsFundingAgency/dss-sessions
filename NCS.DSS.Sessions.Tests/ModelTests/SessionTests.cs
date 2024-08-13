@@ -1,7 +1,7 @@
-﻿using System;
-using NCS.DSS.Sessions.ReferenceData;
+﻿using NCS.DSS.Sessions.ReferenceData;
 using NSubstitute;
 using NUnit.Framework;
+using System;
 
 namespace NCS.DSS.Sessions.Tests.ModelTests
 {
@@ -16,8 +16,8 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetDefaultValues();
 
             // Assert
-            Assert.IsNotNull(session.LastModifiedDate);
-            Assert.IsNull(session.ReasonForNonAttendance);
+            Assert.That(session.LastModifiedDate, Is.Not.Null);
+            Assert.That(session.ReasonForNonAttendance, Is.Null);
         }
 
         [Test]
@@ -28,9 +28,9 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetDefaultValues();
 
             // Assert
-            Assert.AreEqual(DateTime.MaxValue, session.LastModifiedDate);
+            Assert.That(session.LastModifiedDate, Is.EqualTo(DateTime.MaxValue));
         }
-        
+
         [Test]
         public void SessionsTests_CheckReasonForNonAttendanceDoesNotGetPopulated_WhenSetDefaultValuesIsCalled()
         {
@@ -39,10 +39,10 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetDefaultValues();
 
             // Assert
-            Assert.AreEqual(ReasonForNonAttendance.PersonalSituation, session.ReasonForNonAttendance);
+            Assert.That(session.ReasonForNonAttendance, Is.EqualTo(ReasonForNonAttendance.PersonalSituation));
         }
 
-        
+
         [Test]
         public void SessionsTests_CheckSessionsIdIsSet_WhenSetIdsIsCalled()
         {
@@ -51,7 +51,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetIds(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>());
 
             // Assert
-            Assert.AreNotSame(Guid.Empty, session.SessionId);
+            Assert.That(session.SessionId, Is.Not.EqualTo(Guid.Empty));
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetIds(customerId, Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>());
 
             // Assert
-            Assert.AreEqual(customerId, session.CustomerId);
+            Assert.That(session.CustomerId, Is.EqualTo(customerId));
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetIds(Arg.Any<Guid>(), interactionId, Arg.Any<string>(), Arg.Any<string>());
 
             // Assert
-            Assert.AreEqual(interactionId, session.InteractionId);
+            Assert.That(session.InteractionId, Is.EqualTo(interactionId));
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetIds(Arg.Any<Guid>(), Arg.Any<Guid>(), "0000000000", Arg.Any<string>());
 
             // Assert
-            Assert.AreEqual("0000000000", session.LastModifiedTouchpointId);
+            Assert.That(session.LastModifiedTouchpointId, Is.EqualTo("0000000000"));
         }
 
         [Test]
@@ -94,23 +94,23 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
         {
             var session = new Models.Session();
 
-            session.SetIds(Arg.Any<Guid>(), Arg.Any<Guid>(),  Arg.Any<string>(), "0000000000");
+            session.SetIds(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<string>(), "0000000000");
 
             // Assert
-            Assert.AreEqual("0000000000", session.SubcontractorId);
+            Assert.That(session.SubcontractorId, Is.EqualTo("0000000000"));
         }
 
         [Test]
         public void SessionsTests_ReasonForNonAttendanceIsSetToUnknown_WhenSetDefaultValuesIsCalled()
         {
             // Arrange
-            var session = new Models.Session { LastModifiedDate = DateTime.MaxValue, ReasonForNonAttendance=null, SessionAttended=false };
+            var session = new Models.Session { LastModifiedDate = DateTime.MaxValue, ReasonForNonAttendance = null, SessionAttended = false };
 
             // Act
             session.SetDefaultValues();
 
             // Assert
-            Assert.AreEqual(ReasonForNonAttendance.NotKnown, session.ReasonForNonAttendance);
+            Assert.That(session.ReasonForNonAttendance, Is.EqualTo(ReasonForNonAttendance.NotKnown));
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace NCS.DSS.Sessions.Tests.ModelTests
             session.SetDefaultValues();
 
             // Assert
-            Assert.AreEqual(ReasonForNonAttendance.Forgot, session.ReasonForNonAttendance);
+            Assert.That(session.ReasonForNonAttendance, Is.EqualTo(ReasonForNonAttendance.Forgot));
         }
     }
 }

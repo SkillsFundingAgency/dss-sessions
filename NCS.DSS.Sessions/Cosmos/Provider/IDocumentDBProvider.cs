@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Azure.Documents;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using NCS.DSS.Sessions.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Cosmos.Provider
 {

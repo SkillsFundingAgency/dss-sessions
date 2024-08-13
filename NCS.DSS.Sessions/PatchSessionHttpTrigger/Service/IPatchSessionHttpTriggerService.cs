@@ -1,6 +1,6 @@
-﻿using System;
+﻿using NCS.DSS.Sessions.Models;
+using System;
 using System.Threading.Tasks;
-using NCS.DSS.Sessions.Models;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {

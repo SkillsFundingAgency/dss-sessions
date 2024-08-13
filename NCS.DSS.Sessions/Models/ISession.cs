@@ -1,6 +1,6 @@
-﻿using System;
-using DFC.GeoCoding.Standard.AzureMaps.Model;
+﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
 using NCS.DSS.Sessions.ReferenceData;
+using System;
 
 namespace NCS.DSS.Sessions.Models
 {

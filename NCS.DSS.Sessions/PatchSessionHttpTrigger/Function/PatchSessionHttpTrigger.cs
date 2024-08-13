@@ -5,20 +5,19 @@ using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
+using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
-using Newtonsoft.Json;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
@@ -33,6 +32,8 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IJsonHelper _jsonHelper;
         private IGeoCodingService _geoCodingService;
+        private IDynamicHelper _dynamicHelper;
+        private ILogger log;
 
         public PatchSessionHttpTrigger(
             IResourceHelper resourceHelper,
@@ -42,7 +43,9 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             IHttpRequestHelper httpRequestHelper,
             IHttpResponseMessageHelper httpResponseMessageHelper,
             IJsonHelper jsonHelper,
-            IGeoCodingService geoCodingService)
+            IGeoCodingService geoCodingService,
+            IDynamicHelper dynamicHelper,
+            ILogger<PatchSessionHttpTrigger> log)
         {
             _resourceHelper = resourceHelper;
             _validate = validate;
@@ -52,9 +55,11 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             _httpResponseMessageHelper = httpResponseMessageHelper;
             _jsonHelper = jsonHelper;
             _geoCodingService = geoCodingService;
+            _dynamicHelper = dynamicHelper;
+            this.log = log;
         }
 
-        [FunctionName("PATCH")]
+        [Function("PATCH")]
         [Response(HttpStatusCode = (int)HttpStatusCode.OK, Description = "Sessions Patched", ShowSchema = true)]
         [Response(HttpStatusCode = (int)HttpStatusCode.NoContent, Description = "Resource Does Not Exist", ShowSchema = false)]
         [Response(HttpStatusCode = (int)HttpStatusCode.BadRequest, Description = "Patch request is malformed", ShowSchema = false)]
@@ -63,7 +68,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")]HttpRequest req, ILogger log, string customerId, string interactionId, string sessionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, string customerId, string interactionId, string sessionId)
         {
 
             var correlationId = _httpRequestHelper.GetDssCorrelationId(req);
@@ -81,7 +86,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             var touchpointId = _httpRequestHelper.GetDssTouchpointId(req);
             if (string.IsNullOrEmpty(touchpointId))
             {
-                var response = _httpResponseMessageHelper.BadRequest();
+                var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
                 return response;
             }
@@ -89,7 +94,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             var ApimURL = _httpRequestHelper.GetDssApimUrl(req);
             if (string.IsNullOrEmpty(ApimURL))
             {
-                var response = _httpResponseMessageHelper.BadRequest();
+                var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'apimurl' in request header");
                 return response;
             }
@@ -102,21 +107,21 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
-                var response = _httpResponseMessageHelper.BadRequest(customerGuid);
+                var response = new BadRequestObjectResult(customerGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
-                var response = _httpResponseMessageHelper.BadRequest(interactionGuid);
+                var response = new BadRequestObjectResult(interactionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
                 return response;
             }
 
             if (!Guid.TryParse(sessionId, out var sessionGuid))
             {
-                var response = _httpResponseMessageHelper.BadRequest(sessionGuid);
+                var response = new BadRequestObjectResult(sessionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'sessionId' to a Guid: [{sessionGuid}]");
                 return response;
             }
@@ -128,16 +133,16 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 log.LogInformation($"Attempt to get resource from body of the request");
                 sessionPatchRequest = await _httpRequestHelper.GetResourceFromRequest<SessionPatch>(req);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
-                var response = _httpResponseMessageHelper.UnprocessableEntity(ex);
+                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite"]));
                 log.LogError($"Response Status Code: [{response.StatusCode}]. Unable to retrieve body from req", ex);
                 return response;
             }
 
             if (sessionPatchRequest == null)
             {
-                var response = _httpResponseMessageHelper.UnprocessableEntity(req);
+                var response = new UnprocessableEntityObjectResult(req);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. session patch request is null");
                 return response;
             }
@@ -150,7 +155,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (errors != null && errors.Any())
             {
-                var response = _httpResponseMessageHelper.UnprocessableEntity(errors);
+                var response = new UnprocessableEntityObjectResult(errors);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. validation errors with resource", errors);
                 return response;
             }
@@ -160,7 +165,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (!doesCustomerExist)
             {
-                var response = _httpResponseMessageHelper.NoContent(customerGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
                 return response;
             }
@@ -170,7 +175,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (isCustomerReadOnly)
             {
-                var response = _httpResponseMessageHelper.Forbidden(customerGuid);
+                var response = new ObjectResult(customerGuid.ToString())
+                {
+                    StatusCode = (int)HttpStatusCode.Forbidden
+                };
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer is read only [{customerGuid}]");
                 return response;
             }
@@ -180,7 +188,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (!doesInteractionExist)
             {
-                var response = _httpResponseMessageHelper.NoContent(interactionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
                 return response;
             }
@@ -190,11 +198,11 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (sessionForCustomer == null)
             {
-                var response = _httpResponseMessageHelper.NoContent(sessionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Session does not exist [{sessionGuid}]");
                 return response;
             }
-             
+
             if (!string.IsNullOrEmpty(sessionPatchRequest.VenuePostCode))
             {
                 Position position;
@@ -218,7 +226,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (patchedSession == null)
             {
-                var response = _httpResponseMessageHelper.NoContent(sessionGuid);
+                var response = new NoContentResult();
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to Patch Session [{sessionGuid}]");
                 return response;
             }
@@ -234,13 +242,16 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
             if (updatedSession == null)
             {
-                var response = _httpResponseMessageHelper.BadRequest(sessionGuid);
+                var response = new BadRequestObjectResult(sessionGuid);
                 log.LogWarning($"Response Status Code: [{response.StatusCode}]. Failed to patch the session [{sessionGuid}]");
                 return response;
             }
             else
             {
-                var response = _httpResponseMessageHelper.Ok(_jsonHelper.SerializeObjectAndRenameIdProperty(updatedSession, "id", "SessionId"));
+                var response = new JsonResult(updatedSession, new JsonSerializerOptions())
+                {
+                    StatusCode = (int)HttpStatusCode.OK
+                };
                 log.LogInformation($"Response Status Code: [{response.StatusCode}]. Successfully patched the session [{sessionGuid}]");
                 return response;
             }
