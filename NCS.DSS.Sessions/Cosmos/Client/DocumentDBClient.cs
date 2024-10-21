@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Azure.Documents.Client;
+﻿using Microsoft.Azure.Documents.Client;
 
 namespace NCS.DSS.Sessions.Cosmos.Client
 {

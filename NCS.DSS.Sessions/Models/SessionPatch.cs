@@ -1,9 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using DFC.GeoCoding.Standard.AzureMaps.Model;
+﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.JSON.Standard.Attributes;
 using DFC.Swagger.Standard.Annotations;
 using NCS.DSS.Sessions.ReferenceData;
+using System.ComponentModel.DataAnnotations;
 
 namespace NCS.DSS.Sessions.Models
 {
@@ -43,7 +42,7 @@ namespace NCS.DSS.Sessions.Models
         [Display(Description = "Identifier supplied by the touchpoint to indicate their subcontractor")]
         [Example(Description = "01234567899876543210")]
         public string SubcontractorId { get; set; }
-        
+
         [JsonIgnoreOnSerialize]
         public decimal? Longitude { get; set; }
         [JsonIgnoreOnSerialize]

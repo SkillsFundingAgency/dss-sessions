@@ -1,8 +1,6 @@
 ﻿using NCS.DSS.Sessions.ReferenceData;
 using NCS.DSS.Sessions.Validation;
-using NuGet.Frameworks;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -30,9 +28,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -43,9 +41,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -61,9 +59,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -78,9 +76,9 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -97,8 +95,8 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Any(x => x.ErrorMessage == "ReasonForNonAttendance cannot be provided when SessionAttended is true"));
         }
 
@@ -107,15 +105,15 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
         {
             var session = new Models.Session
             {
-                LastModifiedTouchpointId = "0000000001", 
+                LastModifiedTouchpointId = "0000000001",
                 DateandTimeOfSession = DateTime.UtcNow
-                
+
             };
 
             var result = _validate.ValidateResource(session);
 
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Count.Equals(0));
         }
 
@@ -131,8 +129,8 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
 
             var result = _validate.ValidateResource(session);
 
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Count.Equals(1));
         }
 
@@ -142,14 +140,14 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var session = new Models.Session
             {
                 LastModifiedTouchpointId = "0000000001",
-                DateandTimeOfSession = DateTime.UtcNow, 
+                DateandTimeOfSession = DateTime.UtcNow,
                 SubcontractorId = "01234567899876543210"
             };
 
             var result = _validate.ValidateResource(session);
 
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Count.Equals(0));
         }
 
@@ -165,8 +163,8 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
 
             var result = _validate.ValidateResource(session);
 
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Count.Equals(1));
         }
 
@@ -183,7 +181,7 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
             Assert.That(!result.Any(x => x.ErrorMessage == "ReasonForNonAttendance cannot be provided when SessionAttended is true"));
         }
 
@@ -200,7 +198,7 @@ namespace NCS.DSS.Sessions.Tests.ValidationTests
             var result = _validate.ValidateResource(session);
 
             // Assert
-            Assert.IsInstanceOf<List<ValidationResult>>(result);
+            Assert.That(result, Is.InstanceOf<List<ValidationResult>>());
             Assert.That(!result.Any(x => x.ErrorMessage == "ReasonForNonAttendance cannot be provided when SessionAttended is true"));
         }
     }

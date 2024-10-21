@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Azure.Documents;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using NCS.DSS.Sessions.Cosmos.Client;
@@ -143,7 +139,7 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
             var client = DocumentDBClient.CreateDocumentClient();
 
             var sessionForCustomerQuery = client
-                ?.CreateDocumentQuery<Session>(collectionUri, new FeedOptions {MaxItemCount = 1})
+                ?.CreateDocumentQuery<Session>(collectionUri, new FeedOptions { MaxItemCount = 1 })
                 .Where(x => x.CustomerId == customerId && x.SessionId == sessionId)
                 .AsDocumentQuery();
 

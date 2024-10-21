@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using NCS.DSS.Sessions.Cosmos.Provider;
+﻿using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.ServiceBus;
+using System.Net;
 
 namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 {

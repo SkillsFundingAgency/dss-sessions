@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DFC.JSON.Standard;
-using Microsoft.Extensions.Logging;
+﻿using DFC.JSON.Standard;
 using NCS.DSS.Sessions.Models;
 using Newtonsoft.Json.Linq;
 
@@ -33,7 +29,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
             if (!string.IsNullOrEmpty(sessionPatch.VenuePostCode))
             {
-              _jsonHelper.UpdatePropertyValue(obj["VenuePostCode"], sessionPatch.VenuePostCode);
+                _jsonHelper.UpdatePropertyValue(obj["VenuePostCode"], sessionPatch.VenuePostCode);
             }
 
             if (sessionPatch.SessionAttended.HasValue)

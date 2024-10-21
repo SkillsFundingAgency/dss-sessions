@@ -2,10 +2,12 @@
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Moq;
 using NCS.DSS.Sessions.Cosmos.Helper;
 using NCS.DSS.Sessions.GeoCoding;
+using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
@@ -28,7 +30,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private const string ValidCustomerId = "7E467BDB-213F-407A-B86A-1954053D3C24";
         private const string ValidInteractionId = "1e1a555c-9633-4e12-ab28-09ed60d51cb3";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
-        private ILogger _log;
+        private Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>> _log;
         private HttpRequest _request;
         private IResourceHelper _resourceHelper;
         private IValidate _validate;
@@ -40,6 +42,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IGeoCodingService _geoCodingService;
         private Models.Session _session;
         private PostSessionHttpTrigger.Function.PostSessionHttpTrigger _function;
+        private Mock<IDynamicHelper> _dynamicHelper;
 
         [SetUp]
         public void Setup()
@@ -47,9 +50,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _session = Substitute.For<Models.Session>();
             _session.VenuePostCode = string.Empty;
 
-            _request = new DefaultHttpRequest(new DefaultHttpContext());
+            _request = new DefaultHttpContext().Request;
 
-            _log = Substitute.For<ILogger>();
+            _log = new Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>>();
             _resourceHelper = Substitute.For<IResourceHelper>();
             _loggerHelper = Substitute.For<ILoggerHelper>();
             _validate = Substitute.For<IValidate>();
@@ -59,6 +62,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _resourceHelper = Substitute.For<IResourceHelper>();
             _geoCodingService = Substitute.For<IGeoCodingService>();
             _postSessionHttpTriggerService = Substitute.For<IPostSessionHttpTriggerService>();
+            _dynamicHelper = new Mock<IDynamicHelper>();
 
             _httpRequestHelper.GetDssTouchpointId(_request).Returns("0000000001");
             _httpRequestHelper.GetDssApimUrl(_request).Returns("http://localhost:7071/");
@@ -66,7 +70,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
             _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
             _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
-            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_resourceHelper, _validate, _postSessionHttpTriggerService, _loggerHelper, _httpRequestHelper, _httpResponseMessageHelper, _jsonHelper, _geoCodingService);
+            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_resourceHelper, _validate, _postSessionHttpTriggerService, _loggerHelper, _httpRequestHelper, _httpResponseMessageHelper, _jsonHelper, _geoCodingService, _dynamicHelper.Object, _log.Object);
         }
 
         [Test]
@@ -81,8 +85,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
@@ -95,8 +98,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(InValidId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
@@ -109,8 +111,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, InValidId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
@@ -125,8 +126,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual((HttpStatusCode)422, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<UnprocessableEntityObjectResult>());
         }
 
         [Test]
@@ -140,8 +140,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual((HttpStatusCode)422, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<UnprocessableEntityObjectResult>());
         }
 
         [Test]
@@ -155,14 +154,13 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
         }
 
         [Test]
         public async Task PostSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
         {
-           _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
+            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
             _httpResponseMessageHelper
                 .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
@@ -170,8 +168,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
         }
 
         [Test]
@@ -185,8 +182,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
@@ -200,8 +196,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
 
             // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
@@ -213,17 +208,16 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
                 .Created(Arg.Any<string>()).Returns(x => new HttpResponseMessage(HttpStatusCode.Created));
 
             var result = await RunFunction(ValidCustomerId, ValidInteractionId);
-
-            // Assert
-            Assert.IsInstanceOf<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.Created, result.StatusCode);
+            var responseResult = result as JsonResult;
+            //Assert
+            Assert.That(result, Is.InstanceOf<JsonResult>());
+            Assert.That(responseResult.StatusCode, Is.EqualTo((int)HttpStatusCode.Created));
         }
 
-        private async Task<HttpResponseMessage> RunFunction(string customerId, string interactionId)
+        private async Task<IActionResult> RunFunction(string customerId, string interactionId)
         {
             return await _function.Run(
-                _request, 
-                _log,
+                _request,
                 customerId,
                 interactionId).ConfigureAwait(false);
         }

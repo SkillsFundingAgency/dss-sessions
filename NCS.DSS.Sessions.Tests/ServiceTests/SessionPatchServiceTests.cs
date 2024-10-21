@@ -35,7 +35,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var result = _sessionPatchService.Patch(string.Empty, Arg.Any<SessionPatch>());
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual(DateTime.MaxValue, session.DateandTimeOfSession);
+            Assert.That(session.DateandTimeOfSession, Is.EqualTo(DateTime.MaxValue));
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual("CV1 1VC", session.VenuePostCode);
+            Assert.That(session.VenuePostCode, Is.EqualTo("CV1 1VC"));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual(true, session.SessionAttended);
+            Assert.That(session.SessionAttended, Is.EqualTo(true));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual(ReasonForNonAttendance.Forgot, session.ReasonForNonAttendance);
+            Assert.That(session.ReasonForNonAttendance, Is.EqualTo(ReasonForNonAttendance.Forgot));
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual(DateTime.MaxValue, session.LastModifiedDate);
+            Assert.That(session.LastModifiedDate, Is.EqualTo(DateTime.MaxValue));
         }
 
         [Test]
@@ -113,7 +113,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual("0000000111", session.LastModifiedTouchpointId);
+            Assert.That(session.LastModifiedTouchpointId, Is.EqualTo("0000000111"));
         }
 
         [Test]
@@ -126,7 +126,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var session = JsonConvert.DeserializeObject<Session>(patchedSession);
 
             // Assert
-            Assert.AreEqual("0000000111", session.SubcontractorId);
+            Assert.That(session.SubcontractorId, Is.EqualTo("0000000111"));
         }
     }
 }

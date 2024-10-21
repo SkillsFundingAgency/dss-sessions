@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NCS.DSS.Sessions.Cosmos.Provider;
+﻿using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 
 namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Service
@@ -10,7 +7,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Service
     {
 
         private readonly IDocumentDBProvider _documentDbProvider;
-        
+
         public GetSessionHttpTriggerService(IDocumentDBProvider documentDbProvider)
         {
             _documentDbProvider = documentDbProvider;
