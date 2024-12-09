@@ -14,13 +14,13 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class GetSessionHttpTriggerServiceTests
     {
         private IGetSessionHttpTriggerService _getSessionHttpTriggerService;
-        private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _documentDbProvider;
         private readonly Guid _customerId = Guid.Parse("58b43e3f-4a50-4900-9c82-a14682ee90fa");
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _documentDbProvider = new Mock<ICosmosDBProvider>();
             _getSessionHttpTriggerService = Substitute.For<GetSessionHttpTriggerService>(_documentDbProvider.Object);
         }
 

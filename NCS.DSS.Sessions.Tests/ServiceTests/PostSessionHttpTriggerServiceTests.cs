@@ -1,8 +1,12 @@
-﻿using Microsoft.Azure.Documents;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
+using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
+using NCS.DSS.Sessions.ServiceBus;
 using NSubstitute;
 using NUnit.Framework;
 using System;
@@ -19,14 +23,16 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class PostSessionHttpTriggerServiceTests
     {
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
-        private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _documentDbProvider;
+        private Mock<ISessionsServiceBusClient> _serviceBusClient;
         private Models.Session _session;
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<IDocumentDBProvider>();
-            _postSessionHttpTriggerService = new PostSessionHttpTriggerService(_documentDbProvider.Object);
+            _documentDbProvider = new Mock<ICosmosDBProvider>();
+            _serviceBusClient = new Mock<ISessionsServiceBusClient>();
+            _postSessionHttpTriggerService = new PostSessionHttpTriggerService(_documentDbProvider.Object,_serviceBusClient.Object);
             _session = Substitute.For<Models.Session>();
         }
 
@@ -44,29 +50,11 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PostSessionsHttpTriggerServiceTests_CreateAsync_ReturnsResourceWhenUpdated()
         {
             //Arrange
-            const string documentServiceResponseClass = "Microsoft.Azure.Documents.DocumentServiceResponse, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
-            const string dictionaryNameValueCollectionClass = "Microsoft.Azure.Documents.Collections.DictionaryNameValueCollection, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
+            var resourceResponse = new Mock<ItemResponse<Session>>();
+            resourceResponse.Setup(x => x.Resource).Returns(_session);
+            resourceResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Created);
 
-            var resourceResponse = new ResourceResponse<Document>(new Document());
-            var documentServiceResponseType = Type.GetType(documentServiceResponseClass);
-
-            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-
-            var headers = new NameValueCollection { { "x-ms-request-charge", "0" } };
-
-            var headersDictionaryType = Type.GetType(dictionaryNameValueCollectionClass);
-
-            var headersDictionaryInstance = Activator.CreateInstance(headersDictionaryType, headers);
-
-            var arguments = new[] { Stream.Null, headersDictionaryInstance, HttpStatusCode.Created, null };
-
-            var documentServiceResponse = documentServiceResponseType.GetTypeInfo().GetConstructors(flags)[0].Invoke(arguments);
-
-            var responseField = typeof(ResourceResponse<Document>).GetTypeInfo().GetField("response", flags);
-
-            responseField?.SetValue(resourceResponse, documentServiceResponse);
-
-            _documentDbProvider.Setup(x => x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse));
+            _documentDbProvider.Setup(x => x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse.Object));
 
             // Act
             var result = await _postSessionHttpTriggerService.CreateAsync(_session);

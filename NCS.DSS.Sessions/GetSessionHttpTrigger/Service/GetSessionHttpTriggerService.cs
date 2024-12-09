@@ -6,9 +6,9 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Service
     public class GetSessionHttpTriggerService : IGetSessionHttpTriggerService
     {
 
-        private readonly IDocumentDBProvider _documentDbProvider;
+        private readonly ICosmosDBProvider _documentDbProvider;
 
-        public GetSessionHttpTriggerService(IDocumentDBProvider documentDbProvider)
+        public GetSessionHttpTriggerService(ICosmosDBProvider documentDbProvider)
         {
             _documentDbProvider = documentDbProvider;
         }

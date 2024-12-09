@@ -13,7 +13,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class GetSessionByIdHttpTriggerServiceTests
     {
         private IGetSessionByIdHttpTriggerService _getSessionByIdHttpTriggerService;
-        private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _documentDbProvider;
         private Models.Session _session;
         private readonly Guid _customerId = Guid.Parse("58b43e3f-4a50-4900-9c82-a14682ee90fa");
         private readonly Guid _sessionId = Guid.Parse("7E467BDB-213F-407A-B86A-1954053D3C24");
@@ -21,7 +21,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _documentDbProvider = new Mock<ICosmosDBProvider>();
             _getSessionByIdHttpTriggerService = new GetSessionByIdHttpTriggerService(_documentDbProvider.Object);
             _session = Substitute.For<Models.Session>();
         }

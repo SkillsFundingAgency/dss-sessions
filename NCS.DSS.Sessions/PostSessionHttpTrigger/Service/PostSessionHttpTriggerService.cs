@@ -8,11 +8,12 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
     public class PostSessionHttpTriggerService : IPostSessionHttpTriggerService
     {
 
-        private readonly IDocumentDBProvider _documentDbProvider;
-
-        public PostSessionHttpTriggerService(IDocumentDBProvider documentDbProvider)
+        private readonly ICosmosDBProvider _cosmosDbProvider;
+        private readonly ISessionsServiceBusClient _sessionBusClient;
+        public PostSessionHttpTriggerService(ICosmosDBProvider cosmosDbProvider, ISessionsServiceBusClient sessionBusClient)
         {
-            _documentDbProvider = documentDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
+            _sessionBusClient = sessionBusClient;
         }
 
         public async Task<Session> CreateAsync(Session session)
@@ -22,14 +23,14 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Service
 
             session.SetDefaultValues();
 
-            var response = await _documentDbProvider.CreateSessionAsync(session);
+            var response = await _cosmosDbProvider.CreateSessionAsync(session);
 
             return response.StatusCode == HttpStatusCode.Created ? (dynamic)response.Resource : null;
         }
 
         public async Task SendToServiceBusQueueAsync(Session session, string reqUrl)
         {
-            await ServiceBusClient.SendPostMessageAsync(session, reqUrl);
+            await _sessionBusClient.SendPostMessageAsync(session, reqUrl);
         }
     }
 }

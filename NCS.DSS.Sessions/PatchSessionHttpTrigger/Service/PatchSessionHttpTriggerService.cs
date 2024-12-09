@@ -8,12 +8,16 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
     public class PatchSessionHttpTriggerService : IPatchSessionHttpTriggerService
     {
         private readonly ISessionPatchService _sessionPatchService;
-        private readonly IDocumentDBProvider _documentDbProvider;
+        private readonly ICosmosDBProvider _documentDbProvider;
+        private readonly ISessionsServiceBusClient _sessionBusClient;
 
-        public PatchSessionHttpTriggerService(IDocumentDBProvider documentDbProvider, ISessionPatchService sessionPatchService)
+        public PatchSessionHttpTriggerService(ICosmosDBProvider documentDbProvider, 
+            ISessionPatchService sessionPatchService,
+            ISessionsServiceBusClient sessionBusClient)
         {
             _documentDbProvider = documentDbProvider;
             _sessionPatchService = sessionPatchService;
+            _sessionBusClient = sessionBusClient;
         }
 
         public string PatchResource(string sessionJson, SessionPatch sessionPatch)
@@ -65,7 +69,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
         public async Task SendToServiceBusQueueAsync(Session session, Guid customerId, string reqUrl)
         {
-            await ServiceBusClient.SendPatchMessageAsync(session, customerId, reqUrl);
+            await _sessionBusClient.SendPatchMessageAsync(session, customerId, reqUrl);
         }
     }
 }
