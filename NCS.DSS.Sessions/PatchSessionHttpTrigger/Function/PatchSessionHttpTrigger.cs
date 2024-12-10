@@ -58,7 +58,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         [Response(HttpStatusCode = (int)422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 200)]
         [Display(Name = "Patch", Description = "Ability to update a session object for a given customer.")]
-        public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, string customerId, string interactionId, string sessionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "customers/{customerId}/interactions/{interactionId}/sessions/{sessionId}")] HttpRequest req, string customerId, string interactionId, string sessionId)
         {
             var functionName = nameof(PatchSessionHttpTrigger);
 
