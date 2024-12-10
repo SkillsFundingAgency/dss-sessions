@@ -56,7 +56,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         [Response(HttpStatusCode = 422, Description = "Sessions resource validation error(s)", ShowSchema = false)]
         [ProducesResponseType(typeof(Models.Session), 201)]
         [Display(Name = "Post", Description = "Ability to add a session object for a given customer.")]
-        public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, string customerId, string interactionId)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "customers/{customerId}/interactions/{interactionId}/sessions/")] HttpRequest req, string customerId, string interactionId)
 
         {
             var functionName = nameof(PatchSessionHttpTrigger);
