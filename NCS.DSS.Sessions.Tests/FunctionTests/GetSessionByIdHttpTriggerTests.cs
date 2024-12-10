@@ -163,7 +163,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
         private async Task<IActionResult> RunFunction(string customerId, string interactionId, string sessionId)
         {
-            return await _function.RunAsync(
+            return await _function.Run(
                 _request,
                 customerId,
                 interactionId,
