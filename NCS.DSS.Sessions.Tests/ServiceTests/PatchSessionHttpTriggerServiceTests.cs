@@ -20,7 +20,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         private readonly Guid _sessionId = Guid.Parse("7E467BDB-213F-407A-B86A-1954053D3C24");
         private IPatchSessionHttpTriggerService _sessionPatchHttpTriggerService;
         private Mock<ISessionPatchService> _sessionPatchService;
-        private Mock<ICosmosDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
         private Mock<ISessionsServiceBusClient> _serviceBusClient;
         private Session _session;
         private SessionPatch _sessionPatch;
@@ -30,10 +30,10 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<ICosmosDBProvider>();
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
             _sessionPatchService = new Mock<ISessionPatchService>();
             _serviceBusClient = new Mock<ISessionsServiceBusClient>();
-            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object,_serviceBusClient.Object);
+            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_cosmosDbProvider.Object, _sessionPatchService.Object,_serviceBusClient.Object);
             _session = new Session();
             _sessionPatch = new SessionPatch() { VenuePostCode = "B33 9BX" };
             _json = JsonSerializer.Serialize(_sessionPatch);
@@ -65,7 +65,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeUpdated()
         {
             //Arrange
-            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ItemResponse<Session>>(null));
+            _cosmosDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ItemResponse<Session>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -78,7 +78,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.CreateSessionAsync(_session)).Returns(Task.FromResult<ItemResponse<Session>>(null));
+            _cosmosDbProvider.Setup(x => x.CreateSessionAsync(_session)).Returns(Task.FromResult<ItemResponse<Session>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -94,7 +94,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             var resourceResponse = new Mock<ItemResponse<Session>>();
             resourceResponse.Setup(x => x.Resource).Returns(_session);
             resourceResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse.Object));
+            _cosmosDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse.Object));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -109,7 +109,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsNullWhenResourceHasNotBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
+            _cosmosDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>());
@@ -122,7 +122,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsResourceWhenResourceHasBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
+            _cosmosDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>());

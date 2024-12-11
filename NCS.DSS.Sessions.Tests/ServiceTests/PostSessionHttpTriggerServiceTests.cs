@@ -23,16 +23,16 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class PostSessionHttpTriggerServiceTests
     {
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
-        private Mock<ICosmosDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
         private Mock<ISessionsServiceBusClient> _serviceBusClient;
         private Models.Session _session;
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<ICosmosDBProvider>();
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
             _serviceBusClient = new Mock<ISessionsServiceBusClient>();
-            _postSessionHttpTriggerService = new PostSessionHttpTriggerService(_documentDbProvider.Object,_serviceBusClient.Object);
+            _postSessionHttpTriggerService = new PostSessionHttpTriggerService(_cosmosDbProvider.Object,_serviceBusClient.Object);
             _session = Substitute.For<Models.Session>();
         }
 
@@ -54,7 +54,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
             resourceResponse.Setup(x => x.Resource).Returns(_session);
             resourceResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Created);
 
-            _documentDbProvider.Setup(x => x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse.Object));
+            _cosmosDbProvider.Setup(x => x.CreateSessionAsync(It.IsAny<Models.Session>())).Returns(Task.FromResult(resourceResponse.Object));
 
             // Act
             var result = await _postSessionHttpTriggerService.CreateAsync(_session);

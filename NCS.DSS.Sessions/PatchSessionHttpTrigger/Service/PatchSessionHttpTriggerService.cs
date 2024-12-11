@@ -8,14 +8,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
     public class PatchSessionHttpTriggerService : IPatchSessionHttpTriggerService
     {
         private readonly ISessionPatchService _sessionPatchService;
-        private readonly ICosmosDBProvider _documentDbProvider;
+        private readonly ICosmosDBProvider _cosmosDbProvider;
         private readonly ISessionsServiceBusClient _sessionBusClient;
 
         public PatchSessionHttpTriggerService(ICosmosDBProvider documentDbProvider, 
             ISessionPatchService sessionPatchService,
             ISessionsServiceBusClient sessionBusClient)
         {
-            _documentDbProvider = documentDbProvider;
+            _cosmosDbProvider = documentDbProvider;
             _sessionPatchService = sessionPatchService;
             _sessionBusClient = sessionBusClient;
         }
@@ -46,7 +46,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
                 return null;
             }
 
-            var response = await _documentDbProvider.UpdateSessionAsync(sessionJson, sessionId);
+            var response = await _cosmosDbProvider.UpdateSessionAsync(sessionJson, sessionId);
 
             var responseStatusCode = response?.StatusCode;
 
@@ -62,7 +62,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
         public async Task<string> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
         {
-            var session = await _documentDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
+            var session = await _cosmosDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
 
             return session;
         }
