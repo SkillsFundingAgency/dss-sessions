@@ -71,44 +71,52 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: [{customerId}]", correlationId, response.StatusCode,customerId);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: {customerId}", correlationId, response.StatusCode,customerId);
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
                 var response = new BadRequestObjectResult(interactionGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: [{interactionId}]", correlationId, response.StatusCode,interactionId);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists [{customerGuid}]", correlationId, customerGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists {customerGuid}", correlationId, customerGuid);
             var doesCustomerExist = await _cosmosDbProvider.DoesCustomerResourceExist(customerGuid);
 
             if (!doesCustomerExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist [{customerGuid}]", correlationId, response.StatusCode,customerGuid);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist {customerGuid}", correlationId, response.StatusCode,customerGuid);
                 return response;
             }
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Customer record found in Cosmos DB {customerGuid}", correlationId, customerGuid);
+            }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists [{interactionGuid}]", correlationId, interactionGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists {interactionGuid}", correlationId, interactionGuid);
             var doesInteractionExist = await _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist [{interactionGuid}]", correlationId, response.StatusCode,interactionGuid);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {interactionGuid}", correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Interaction record with {interactionGuid} found in Cosmos DB for Customer {customerGuid}", correlationId, interactionGuid, customerGuid);
+            }
 
-            _logger.LogInformation("{CorrelationId} Attempting to get sessions for customer [{customerGuid}]", correlationId, customerGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to get sessions for customer {customerGuid}", correlationId, customerGuid);
             var sessions = await _sessionGetService.GetSessionsAsync(customerGuid);
 
             if (sessions == null)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Sessions do not exist [{interactionGuid}]", correlationId, response.StatusCode,interactionGuid);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Sessions do not exist {interactionGuid}", correlationId, response.StatusCode,interactionGuid);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }
@@ -121,7 +129,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
                 {
                     StatusCode = (int)HttpStatusCode.OK
                 };
-                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Get sessions succeeded for customer [{customerGuid}]", correlationId,response.StatusCode, customerGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Get sessions succeeded for customer {customerGuid}", correlationId,response.StatusCode, customerGuid);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }

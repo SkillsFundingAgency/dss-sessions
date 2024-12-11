@@ -143,17 +143,21 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists [{customerGuid}]", correlationId, customerGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists {customerGuid}", correlationId, customerGuid);
             var doesCustomerExist = await _cosmosDbProvider.DoesCustomerResourceExist(customerGuid);
 
             if (!doesCustomerExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist [{customerGuid}]", correlationId, customerGuid);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist {customerGuid}", correlationId, customerGuid);
                 return response;
             }
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Customer record found in Cosmos DB {customerGuid}", correlationId, customerGuid);                
+            }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if this is a read only customer [{customerGuid}]", correlationId, customerGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to see if this is a read only customer {customerGuid}", correlationId, customerGuid);
             var isCustomerReadOnly = await _cosmosDbProvider.DoesCustomerHaveATerminationDate(customerGuid);
 
             if (isCustomerReadOnly)
@@ -162,11 +166,11 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 {
                     StatusCode = (int)HttpStatusCode.Forbidden
                 };
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer is read only [{customerGuid}]", correlationId, response.StatusCode,interactionGuid);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer is read only {customerGuid}", correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists [{interactionGuid}]", correlationId, interactionGuid);
+            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists {interactionGuid}", correlationId, interactionGuid);
             var doesInteractionExist = await _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
@@ -175,12 +179,14 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {interactionGuid}", correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
-
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Interaction record with {interactionGuid} found in Cosmos DB for Customer {customerGuid}", correlationId, interactionGuid, customerGuid);
+            }
             _logger.LogInformation("{CorrelationId} Attempting to get long and lat for postcode",correlationId);
             if (!string.IsNullOrEmpty(sessionRequest.VenuePostCode))
             {
                 Position position;
-
                 try
                 {
                     var postcode = sessionRequest.VenuePostCode.Replace(" ", string.Empty);
@@ -188,36 +194,35 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e,"{CorrelationId} Unable to get long and lat for postcode: [{VenuePostCode}]", correlationId, sessionRequest.VenuePostCode);
+                    _logger.LogError(e,"{CorrelationId} Unable to get long and lat for postcode: {VenuePostCode}", correlationId, sessionRequest.VenuePostCode);
                     throw;
                 }
 
                 sessionRequest.SetLongitudeAndLatitude(position);
             }
-
-            _logger.LogInformation("{CorrelationId} Attempting to Create session for customer [{customerGuid}]", correlationId, customerGuid);
-            var session = await _sessionPostService.CreateAsync(sessionRequest);
-
-            if (session != null)
+            else
             {
-                _logger.LogInformation("{CorrelationId} Attempting to send to service bus [{SessionId}]", correlationId, session.SessionId);
-                await _sessionPostService.SendToServiceBusQueueAsync(session, ApimURL);
+                _logger.LogInformation("{CorrelationId} Postcode is Null or Empty. Unable to get long and lat.", correlationId);
             }
+            _logger.LogInformation("{CorrelationId} Attempting to Create session for customer {customerGuid}", correlationId, customerGuid);
+            var session = await _sessionPostService.CreateAsync(sessionRequest);
 
             if (session == null)
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Failed to post a session for customer [{customerGuid}]", correlationId, response.StatusCode);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Failed to post a session for customer {customerGuid}", correlationId, response.StatusCode);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }
             else
             {
+                _logger.LogInformation("{CorrelationId} Attempting to send to service bus {SessionId}", correlationId, session.SessionId);
+                await _sessionPostService.SendToServiceBusQueueAsync(session, ApimURL);
                 var response = new JsonResult(session, new JsonSerializerOptions())
                 {
                     StatusCode = (int)HttpStatusCode.Created
                 };
-                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Successfully posted a session [{SessionId}] for customer [{customerGuid}]",correlationId,response.StatusCode,session.SessionId,customerGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Successfully posted a session {SessionId} for customer {customerGuid}",correlationId,response.StatusCode,session.SessionId,customerGuid);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }

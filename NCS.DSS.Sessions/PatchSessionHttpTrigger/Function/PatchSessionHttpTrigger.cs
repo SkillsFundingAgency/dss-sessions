@@ -98,14 +98,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: [{customerId}]",correlationId,response.StatusCode,customerId);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: {customerId}",correlationId,response.StatusCode,customerId);
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
                 var response = new BadRequestObjectResult(interactionGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: [{interactionId}]", correlationId, response.StatusCode,interactionId);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
                 return response;
             }
 
@@ -159,6 +159,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist {CustomerId}",correlationId,customerGuid);
                 return response;
             }
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Customer record found in Cosmos DB {customerGuid}", correlationId, customerGuid);
+            }
 
             _logger.LogInformation("{CorrelationId} Attempting to see if this is a read only customer {CustomerId}",correlationId,customerGuid);
             var isCustomerReadOnly = await _cosmosDbProvider.DoesCustomerHaveATerminationDate(customerGuid);
@@ -181,6 +185,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 var response = new NoContentResult();
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {InteractionId}",correlationId, response.StatusCode,interactionGuid);
                 return response;
+            }
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Interaction record with {interactionGuid} found in Cosmos DB for Customer {customerGuid}", correlationId, interactionGuid, customerGuid);
             }
 
             _logger.LogInformation("{CorrelationId} Attempting to get sessions for customer {CustomerId}",correlationId,customerGuid);
@@ -210,7 +218,10 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
 
                 sessionPatchRequest.SetLongitudeAndLatitude(position);
             }
-
+            else
+            {
+                _logger.LogInformation("{CorrelationId} Postcode is Null or Empty. Unable to get long and lat.", correlationId);
+            }
             _logger.LogInformation("{CorrelationId} Attempting to Patch Session {SessionId}",correlationId,sessionGuid);
             var patchedSession = _sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
 
@@ -224,12 +235,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             _logger.LogInformation("{CorrelationId} Attempting to update Session {SessionId}",correlationId,sessionGuid);
             var updatedSession = await _sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
 
-            if (updatedSession != null)
-            {
-                _logger.LogInformation("{CorrelationId} Attempting to send to service bus {SessionId}",correlationId,sessionGuid);
-                await _sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
-            }
-
             if (updatedSession == null)
             {
                 var response = new BadRequestObjectResult(sessionGuid);
@@ -238,7 +243,9 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 return response;
             }
             else
-            {
+            { 
+                _logger.LogInformation("{CorrelationId} Attempting to send to service bus {SessionId}",correlationId,sessionGuid);
+                await _sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
                 var response = new JsonResult(updatedSession, new JsonSerializerOptions())
                 {
                     StatusCode = (int)HttpStatusCode.OK
