@@ -93,7 +93,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(subcontractorId))
                 _logger.LogInformation("{CorrelationId} Unable to locate 'SubcontractorId' in request header", correlationId);
 
-            _logger.LogInformation("{CorrelationId} Patch Session C# HTTP trigger function  processed a request. By Touchpoint: [{touchpointId}]", correlationId, touchpointId);
+            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {

@@ -77,7 +77,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(touchpointId))
             {
                 var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
-                _logger.LogInformation($"Response Status Code: [{response.StatusCode}]. Unable to locate 'TouchpointId' in request header");
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'TouchpointId' in request header", correlationId, response.StatusCode);
                 return response;
             }
 
@@ -85,27 +85,27 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(ApimURL))
             {
                 var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to locate 'apimurl' in request header");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'apimurl' in request header",correlationId,response.StatusCode);
                 return response;
             }
 
             var subcontractorId = _httpRequestHelper.GetDssSubcontractorId(req);
             if (string.IsNullOrEmpty(subcontractorId))
-                _logger.LogWarning($"Unable to locate 'SubcontractorId' in request header");
+                _logger.LogWarning("{CorrelationId} Unable to locate 'SubcontractorId' in request header",correlationId);
 
-            _logger.LogInformation($"Post Session C# HTTP trigger function  processed a request. By Touchpoint: [{touchpointId}]");
+            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'customerId' to a Guid: [{customerId}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: {customerId}", correlationId, response.StatusCode,customerGuid);
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
                 var response = new BadRequestObjectResult(interactionGuid);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Unable to parse 'interactionId' to a Guid: [{interactionId}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
                 return response;
             }
 
@@ -113,47 +113,47 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
 
             try
             {
-                _logger.LogInformation($"Attempt to get resource from body of the request");
+                _logger.LogInformation("{CorrelationId} Attempt to get resource from body of the request",correlationId);
                 sessionRequest = await _httpRequestHelper.GetResourceFromRequest<Session>(req);
             }
             catch (Exception ex)
             {
                 var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite"]));
-                _logger.LogError($"Response Status Code: [{response.StatusCode}]. Unable to retrieve body from req", ex);
+                _logger.LogError(ex,"{CorrelationId} Response Status Code: {StatusCode}. Unable to retrieve body from req {Exception}", correlationId, response.StatusCode, ex.Message);
                 return response;
             }
 
             if (sessionRequest == null)
             {
                 var response = new UnprocessableEntityObjectResult(req);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. session request is null");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. session request is null", correlationId, response.StatusCode);
                 return response;
             }
 
-            _logger.LogInformation($"Attempt to set id's for session patch");
+            _logger.LogInformation("{CorrelationId} Attempt to set id's for session patch",correlationId);
             sessionRequest.SetIds(customerGuid, interactionGuid, touchpointId, subcontractorId);
 
-            _logger.LogInformation($"Attempt to validate resource");
+            _logger.LogInformation("{CorrelationId} Attempt to validate resource",correlationId);
             var errors = _validate.ValidateResource(sessionRequest);
 
             if (errors != null && errors.Any())
             {
                 var response = new UnprocessableEntityObjectResult(errors);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. validation errors with resource", errors);
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. validation errors with resource", correlationId, response.StatusCode, errors);
                 return response;
             }
 
-            _logger.LogInformation($"Attempting to see if customer exists [{customerGuid}]");
+            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists [{customerGuid}]", correlationId, customerGuid);
             var doesCustomerExist = await _cosmosDbProvider.DoesCustomerResourceExist(customerGuid);
 
             if (!doesCustomerExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer does not exist [{customerGuid}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist [{customerGuid}]", correlationId, customerGuid);
                 return response;
             }
 
-            _logger.LogInformation($"Attempting to see if this is a read only customer [{customerGuid}]");
+            _logger.LogInformation("{CorrelationId} Attempting to see if this is a read only customer [{customerGuid}]", correlationId, customerGuid);
             var isCustomerReadOnly = await _cosmosDbProvider.DoesCustomerHaveATerminationDate(customerGuid);
 
             if (isCustomerReadOnly)
@@ -162,21 +162,21 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 {
                     StatusCode = (int)HttpStatusCode.Forbidden
                 };
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Customer is read only [{customerGuid}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer is read only [{customerGuid}]", correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
 
-            _logger.LogInformation($"Attempting to see if interaction exists [{interactionGuid}]");
+            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists [{interactionGuid}]", correlationId, interactionGuid);
             var doesInteractionExist = await _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Interaction does not exist [{interactionGuid}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {interactionGuid}", correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
 
-            _logger.LogInformation($"Attempting to get long and lat for postcode");
+            _logger.LogInformation("{CorrelationId} Attempting to get long and lat for postcode",correlationId);
             if (!string.IsNullOrEmpty(sessionRequest.VenuePostCode))
             {
                 Position position;
@@ -188,26 +188,26 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"Unable to get long and lat for postcode: [{sessionRequest.VenuePostCode}]", e);
+                    _logger.LogError(e,"{CorrelationId} Unable to get long and lat for postcode: [{VenuePostCode}]", correlationId, sessionRequest.VenuePostCode);
                     throw;
                 }
 
                 sessionRequest.SetLongitudeAndLatitude(position);
             }
 
-            _logger.LogInformation($"Attempting to Create session for customer [{customerGuid}]");
+            _logger.LogInformation("{CorrelationId} Attempting to Create session for customer [{customerGuid}]", correlationId, customerGuid);
             var session = await _sessionPostService.CreateAsync(sessionRequest);
 
             if (session != null)
             {
-                _logger.LogInformation($"Attempting to send to service bus [{session.SessionId}]");
+                _logger.LogInformation("{CorrelationId} Attempting to send to service bus [{SessionId}]", correlationId, session.SessionId);
                 await _sessionPostService.SendToServiceBusQueueAsync(session, ApimURL);
             }
 
             if (session == null)
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning($"Response Status Code: [{response.StatusCode}]. Failed to post a session for customer [{customerGuid}]");
+                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Failed to post a session for customer [{customerGuid}]", correlationId, response.StatusCode);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }
@@ -217,7 +217,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 {
                     StatusCode = (int)HttpStatusCode.Created
                 };
-                _logger.LogInformation($"Response Status Code: [{response.StatusCode}]. Successfully posted a session [{session.SessionId}] for customer [{customerGuid}]");
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Successfully posted a session [{SessionId}] for customer [{customerGuid}]",correlationId,response.StatusCode,session.SessionId,customerGuid);
                 _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }

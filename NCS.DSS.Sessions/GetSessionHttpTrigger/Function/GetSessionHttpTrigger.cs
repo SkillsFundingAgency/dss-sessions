@@ -66,8 +66,7 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'TouchpointId' in request header",correlationId,response.StatusCode);
                 return response;
             }
-
-            _logger.LogInformation("{CorrelationId} Get Session C# HTTP trigger function  processed a request. By Touchpoint: [{touchpointId}]", correlationId, touchpointId);
+            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
 
             if (!Guid.TryParse(customerId, out var customerGuid))
             {

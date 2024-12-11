@@ -66,8 +66,8 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Get Session By Id C# HTTP trigger function  processed a request. By Touchpoint:[{touchpointId}]",correlationId,touchpointId);
-
+            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
+            
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
