@@ -8,9 +8,9 @@ namespace NCS.DSS.Sessions.GetSessionHttpTrigger.Service
 
         private readonly ICosmosDBProvider _cosmosDbProvider;
 
-        public GetSessionHttpTriggerService(ICosmosDBProvider documentDbProvider)
+        public GetSessionHttpTriggerService(ICosmosDBProvider cosmosDbProvider)
         {
-            _cosmosDbProvider = documentDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
         }
 
         public async Task<List<Session>> GetSessionsAsync(Guid customerId)

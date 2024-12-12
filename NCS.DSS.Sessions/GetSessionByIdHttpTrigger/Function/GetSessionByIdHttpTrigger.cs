@@ -65,8 +65,6 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'TouchpointId' in request header", correlationId, response.StatusCode);
                 return response;
             }
-
-            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
             
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
@@ -88,6 +86,7 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'sessionId' to a Guid: {sessionGuid}", correlationId, response.StatusCode, sessionGuid);
                 return response;
             }
+            _logger.LogInformation("{CorrelationId} Input validation has succeeded.", correlationId);
 
             _logger.LogInformation("{CorrelationId} Attempting to see if customer exists {customerGuid}", correlationId, customerGuid);
             var doesCustomerExist = await _cosmosDbProvider.DoesCustomerResourceExist(customerGuid);

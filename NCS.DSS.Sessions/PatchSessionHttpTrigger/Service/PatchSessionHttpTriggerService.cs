@@ -11,11 +11,11 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
         private readonly ICosmosDBProvider _cosmosDbProvider;
         private readonly ISessionsServiceBusClient _sessionBusClient;
 
-        public PatchSessionHttpTriggerService(ICosmosDBProvider documentDbProvider, 
+        public PatchSessionHttpTriggerService(ICosmosDBProvider cosmosDbProvider, 
             ISessionPatchService sessionPatchService,
             ISessionsServiceBusClient sessionBusClient)
         {
-            _cosmosDbProvider = documentDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
             _sessionPatchService = sessionPatchService;
             _sessionBusClient = sessionBusClient;
         }

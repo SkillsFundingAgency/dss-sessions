@@ -28,7 +28,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         private IGeoCodingService _geoCodingService;
         private IDynamicHelper _dynamicHelper;
 
-        public PostSessionHttpTrigger(ICosmosDBProvider cosomsDbProvider,
+        public PostSessionHttpTrigger(ICosmosDBProvider cosmosDbProvider,
             IValidate validate,
             IPostSessionHttpTriggerService sessionPostService,
             ILogger<PostSessionHttpTrigger> logger,
@@ -37,7 +37,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             IGeoCodingService geoCodingService,
             IDynamicHelper dynamicHelper)
         {
-            _cosmosDbProvider = cosomsDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
             _validate = validate;
             _sessionPostService = sessionPostService;
             _logger = logger;
@@ -93,8 +93,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(subcontractorId))
                 _logger.LogWarning("{CorrelationId} Unable to locate 'SubcontractorId' in request header",correlationId);
 
-            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
-
+            
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
@@ -108,6 +107,8 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
                 return response;
             }
+
+            _logger.LogInformation("{CorrelationId} Input validation has succeeded.", correlationId);
 
             Session sessionRequest;
 

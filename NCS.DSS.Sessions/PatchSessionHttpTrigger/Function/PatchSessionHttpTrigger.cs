@@ -93,8 +93,6 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(subcontractorId))
                 _logger.LogInformation("{CorrelationId} Unable to locate 'SubcontractorId' in request header", correlationId);
 
-            _logger.LogInformation("Header validation has succeeded. Touchpoint ID: {TouchpointId}", touchpointId);
-
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
@@ -115,6 +113,8 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'sessionId' to a Guid: {SessionId}", correlationId, response.StatusCode,sessionGuid);
                 return response;
             }
+
+            _logger.LogInformation("{CorrelationId} Input validation has succeeded.", correlationId);
 
             SessionPatch sessionPatchRequest;
 
