@@ -8,12 +8,16 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
     public class PatchSessionHttpTriggerService : IPatchSessionHttpTriggerService
     {
         private readonly ISessionPatchService _sessionPatchService;
-        private readonly IDocumentDBProvider _documentDbProvider;
+        private readonly ICosmosDBProvider _cosmosDbProvider;
+        private readonly ISessionsServiceBusClient _sessionBusClient;
 
-        public PatchSessionHttpTriggerService(IDocumentDBProvider documentDbProvider, ISessionPatchService sessionPatchService)
+        public PatchSessionHttpTriggerService(ICosmosDBProvider cosmosDbProvider, 
+            ISessionPatchService sessionPatchService,
+            ISessionsServiceBusClient sessionBusClient)
         {
-            _documentDbProvider = documentDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
             _sessionPatchService = sessionPatchService;
+            _sessionBusClient = sessionBusClient;
         }
 
         public string PatchResource(string sessionJson, SessionPatch sessionPatch)
@@ -42,7 +46,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
                 return null;
             }
 
-            var response = await _documentDbProvider.UpdateSessionAsync(sessionJson, sessionId);
+            var response = await _cosmosDbProvider.UpdateSessionAsync(sessionJson, sessionId);
 
             var responseStatusCode = response?.StatusCode;
 
@@ -58,14 +62,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Service
 
         public async Task<string> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
         {
-            var session = await _documentDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
+            var session = await _cosmosDbProvider.GetSessionForCustomerToUpdateAsync(customerId, sessionId);
 
             return session;
         }
 
         public async Task SendToServiceBusQueueAsync(Session session, Guid customerId, string reqUrl)
         {
-            await ServiceBusClient.SendPatchMessageAsync(session, customerId, reqUrl);
+            await _sessionBusClient.SendPatchMessageAsync(session, customerId, reqUrl);
         }
     }
 }
