@@ -55,73 +55,55 @@
         },
         "workspaceResourceGroup": {
             "type": "string"
+        },
+        "appInsightsInstrumentationKey": {
+        "type": "string"
         }
     },
     "variables": {
         "functionAppTemplateUri": "[concat(parameters('templateBaseUrl'), '/deployments/function-app-resources.json')]",
-        "sharedAppServicePlanId": "[resourceId(parameters('sharedAppServicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('sharedAppServicePlanName'))]"
+        "sharedAppServicePlanId": "[resourceId(parameters('sharedAppServicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('sharedAppServicePlanName'))]",
+        "appInsightsName": "[concat('dss-', toLower(parameters('configEnvironmentName')), '-', split(parameters('functionAppName'), '-')[2], '-ai')]",
+        "storageAccountConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=', parameters('storageAccountKey'), ';EndpointSuffix=core.windows.net')]"
     },
     "resources": [
         {
-            "name": "[concat('FunctionApp-', parameters('functionAppNames')[copyIndex()])]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[format('{0}/{1}', parameters('functionAppNames')[copyIndex()], 'appsettings')]",
             "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('functionAppTemplateUri')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "functionAppName": {
-                        "value": "[parameters('functionAppNames')[copyIndex()]]"
-                    },
-                    "appServicePlanId": {
-                        "value": "[variables('sharedAppServicePlanId')]"
-                    },
-                    "azureMapsApiVersion": {
-                        "value": "[parameters('azureMapsApiVersion')]"
-                    },
-                    "azureMapsSubscriptionKey": {
-                        "value": "[parameters('azureMapsSubscriptionKey')]"
-                    },
-                    "azureMapsUrl": {
-                        "value": "[parameters('azureMapsUrl')]"
-                    },
-                    "configEnvironmentName": {
-                        "value": "[parameters('environmentName')]"
-                    },
-                    "cosmosDbCollectionId": {
-                        "value": "[parameters('cosmosDbCollectionId')]"
-                    },
-                    "cosmosDbDatabaseId": {
-                        "value": "[parameters('cosmosDbDatabaseId')]"
-                    },
-                    "cosmosDbEndpoint": {
-                        "value": "[parameters('cosmosDbEndpoint')]"
-                    },
-                    "cosmosDbKey": {
-                        "value": "[parameters('cosmosDbKey')]"
-                    },
-                    "serviceBusConnectionString": {
-                        "value": "[parameters('serviceBusConnectionString')]"
-                    },
-                    "serviceBusQueueName": {
-                        "value": "[parameters('serviceBusQueueName')]"
-                    },
-                    "storageAccountName": {
-                        "value": "[parameters('storageAccountName')]"
-                    },
-                    "storageAccountKey": {
-                        "value": "[parameters('storageAccountKey')]"
-                    },
-                    "workspaceId": {
-                        "value": "[resourceId(parameters('workspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
-                    }
-                }
+                "EnvironmentName": "[toUpper(parameters('environmentName'))]",
+                "FUNCTIONS_EXTENSION_VERSION": "~4",
+                "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+                "MSDEPLOY_RENAME_LOCKED_FILES": "1",
+                "AzureWebJobsStorage": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net', parameters('storageAccountName'), parameters('storageAccountKey'))]",
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('appInsightsInstrumentationKey')]",
+                "AzureMapApiVersion": "[parameters('azureMapsApiVersion')]",
+                "AzureMapURL": "[parameters('azureMapsUrl')]",
+                "SessionConnectionString": "[concat('AccountEndpoint=', parameters('cosmosDbEndpoint'), '/;AccountKey=', parameters('cosmosDbKey'), ';')]",
+                "CollectionId": "[parameters('cosmosDbCollectionId')]",
+                "DatabaseId": "[parameters('cosmosDbDatabaseId')]",
+                "CustomerDatabaseId": "customers",
+                "CustomerCollectionId": "customers",
+                "InteractionDatabaseId": "interactions",
+                "InteractionCollectionId": "interactions",
+                "AzureMapSubscriptionKey": "[parameters('azureMapsSubscriptionKey')]",
+                "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
+                "QueueName": "[parameters('serviceBusQueueName')]",
+                "AzureCountrySet": "GB"
             },
             "copy": {
-                "name": "FunctionAppCopy",
+                "name": "FunctionAppSettingsCopy",
+                "count": "[length(parameters('functionAppNames'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2023-12-01",
+            "name": "[format('{0}/{1}', parameters('functionAppNames')[copyIndex()], 'connectionstrings')]",
+            "properties": {},
+            "copy": {
+                "name": "FunctionConnectionStringsCopy",
                 "count": "[length(parameters('functionAppNames'))]"
             }
         }
