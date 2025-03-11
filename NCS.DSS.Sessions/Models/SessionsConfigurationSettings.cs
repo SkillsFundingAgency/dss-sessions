@@ -8,6 +8,7 @@ namespace NCS.DSS.Sessions.Models
 {
     public class SessionsConfigurationSettings
     {
+        public required string CosmosDbEndpoint { get; set; }
         public string SessionConnectionString { get; set; }
         public string CollectionId { get; set; }
         public string CustomerCollectionId { get; set; }
