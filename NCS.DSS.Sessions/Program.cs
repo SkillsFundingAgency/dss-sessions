@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using DFC.GeoCoding.Standard.AzureMaps.Service;
 using DFC.HTTP.Standard;
@@ -58,12 +59,14 @@ namespace NCS.DSS.Sessions
                     services.AddScoped<IGeoCodingService, GeoCodingService>();
                     services.AddSingleton(sp =>
                     {
-                        var settings = sp.GetRequiredService<IOptions<SessionsConfigurationSettings>>().Value;
-                        var options = new CosmosClientOptions()
+                        var cosmosDbEndpoint = configuration["CosmosDbEndpoint"];
+                        if (string.IsNullOrEmpty(cosmosDbEndpoint))
                         {
-                            ConnectionMode = ConnectionMode.Gateway
-                        };
-                        return new CosmosClient(settings.SessionConnectionString, options);
+                            throw new InvalidOperationException("CosmosDbEndpoint is not configured.");
+                        }
+
+                        var options = new CosmosClientOptions() { ConnectionMode = ConnectionMode.Gateway };
+                        return new CosmosClient(cosmosDbEndpoint, new DefaultAzureCredential(), options);
                     });
                     services.Configure<LoggerFilterOptions>(options =>
                     {
