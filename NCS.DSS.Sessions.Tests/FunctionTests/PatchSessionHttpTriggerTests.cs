@@ -1,11 +1,9 @@
-﻿using DFC.Common.Standard.Logging;
-using DFC.HTTP.Standard;
-using DFC.JSON.Standard;
+﻿using DFC.HTTP.Standard;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NCS.DSS.Sessions.Cosmos.Helper;
+using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
@@ -26,14 +24,12 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private const string ValidInteractionId = "1e1a555c-9633-4e12-ab28-09ed60d51cb3";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
         private const string ValidSessionId = "d5369b9a-6959-4bd3-92fc-1583e72b7e51";
-        private Mock<ILogger<PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger>> _log;
+        private Mock<ILogger<PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger>> _logger;
         private HttpRequest _request;
-        private Mock<IResourceHelper> _resourceHelper;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
         private IValidate _validate;
-        private Mock<ILoggerHelper> _loggerHelper;
         private Mock<IHttpRequestHelper> _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
-        private IJsonHelper _jsonHelper;
         private Mock<IPatchSessionHttpTriggerService> _patchSessionHttpTriggerService;
         private Mock<IGeoCodingService> _geoCodingService;
         private Session _session;
@@ -50,29 +46,24 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
             _request = new DefaultHttpContext().Request;
 
-            _log = new Mock<ILogger<PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger>>();
-            _resourceHelper = new Mock<IResourceHelper>();
-            _loggerHelper = new Mock<ILoggerHelper>();
+            _logger = new Mock<ILogger<PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger>>();
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
             _httpRequestHelper = new Mock<IHttpRequestHelper>();
             _httpResponseMessageHelper = new HttpResponseMessageHelper();
-            _jsonHelper = new JsonHelper();
-            _resourceHelper = new Mock<IResourceHelper>();
             _validate = new Validate();
             _patchSessionHttpTriggerService = new Mock<IPatchSessionHttpTriggerService>();
             _geoCodingService = new Mock<IGeoCodingService>();
             _sessionString = JsonConvert.SerializeObject(_session);
             _dynamicHelper = new Mock<IDynamicHelper>();
             _function = new PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger(
-                _resourceHelper.Object,
+                _cosmosDbProvider.Object,
                 _validate,
                 _patchSessionHttpTriggerService.Object,
-                _loggerHelper.Object,
+                _logger.Object,
                 _httpRequestHelper.Object,
                 _httpResponseMessageHelper,
-                _jsonHelper,
                 _geoCodingService.Object,
-                _dynamicHelper.Object,
-                _log.Object);
+                _dynamicHelper.Object);
         }
 
         [Test]
@@ -133,9 +124,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _patchSessionHttpTriggerService.Setup(x => x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult("SOME SESSION"));
             _patchSessionHttpTriggerService.Setup(x => x.PatchResource(It.IsAny<string>(), It.IsAny<SessionPatch>())).Returns<string>(null);
             _patchSessionHttpTriggerService.Setup(x => x.UpdateCosmosAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<Session>(null));
@@ -155,9 +146,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _session.VenuePostCode = "sdfsdfsdfds";
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Throws(new JsonException());
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _patchSessionHttpTriggerService.Setup(x => x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult("SOME SESSION"));
             _patchSessionHttpTriggerService.Setup(x => x.PatchResource(It.IsAny<string>(), It.IsAny<SessionPatch>())).Returns("SOME STRING");
             _patchSessionHttpTriggerService.Setup(x => x.UpdateCosmosAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<Session>(null));
@@ -175,7 +166,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
 
             // Act
@@ -191,9 +182,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -208,9 +199,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(false);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -225,9 +216,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _patchSessionHttpTriggerService.Setup(x => x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult("SOME SESSION"));
             _patchSessionHttpTriggerService.Setup(x => x.PatchResource(It.IsAny<string>(), It.IsAny<SessionPatch>())).Returns("SOME STRING");
             _patchSessionHttpTriggerService.Setup(x => x.UpdateCosmosAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<Session>(null));
@@ -259,9 +250,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _httpRequestHelper.Setup(x => x.GetDssApimUrl(_request)).Returns("someurl");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _httpRequestHelper.Setup(x => x.GetResourceFromRequest<SessionPatch>(_request)).Returns(Task.FromResult(_sessionPatch));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
             _patchSessionHttpTriggerService.Setup(x => x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult("SOME SESSION"));
             _patchSessionHttpTriggerService.Setup(x => x.PatchResource(It.IsAny<string>(), It.IsAny<SessionPatch>())).Returns("SOME STRING");
             _patchSessionHttpTriggerService.Setup(x => x.UpdateCosmosAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<Session>(_session));

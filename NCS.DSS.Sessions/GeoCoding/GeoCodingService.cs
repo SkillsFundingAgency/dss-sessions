@@ -7,7 +7,7 @@ namespace NCS.DSS.Sessions.GeoCoding
 
     public class GeoCodingService : IGeoCodingService
     {
-        private ILogger _logger;
+        private ILogger<GeoCodingService> _logger;
 
         private readonly IAzureMapService _azureMapService;
 

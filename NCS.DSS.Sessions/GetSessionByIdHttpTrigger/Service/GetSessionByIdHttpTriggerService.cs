@@ -6,16 +6,16 @@ namespace NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service
     public class GetSessionByIdHttpTriggerService : IGetSessionByIdHttpTriggerService
     {
 
-        private readonly IDocumentDBProvider _documentDbProvider;
+        private readonly ICosmosDBProvider _cosmosDbProvider;
 
-        public GetSessionByIdHttpTriggerService(IDocumentDBProvider documentDbProvider)
+        public GetSessionByIdHttpTriggerService(ICosmosDBProvider cosmosDbProvider)
         {
-            _documentDbProvider = documentDbProvider;
+            _cosmosDbProvider = cosmosDbProvider;
         }
 
         public async Task<Session> GetSessionForCustomerAsync(Guid customerId, Guid sessionId)
         {
-            var session = await _documentDbProvider.GetSessionForCustomerAsync(customerId, sessionId);
+            var session = await _cosmosDbProvider.GetSessionForCustomerAsync(customerId, sessionId);
 
             return session;
         }

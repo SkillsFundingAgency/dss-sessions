@@ -1,11 +1,9 @@
-﻿using DFC.Common.Standard.Logging;
-using DFC.HTTP.Standard;
-using DFC.JSON.Standard;
+﻿using DFC.HTTP.Standard;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NCS.DSS.Sessions.Cosmos.Helper;
+using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
@@ -30,14 +28,12 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private const string ValidCustomerId = "7E467BDB-213F-407A-B86A-1954053D3C24";
         private const string ValidInteractionId = "1e1a555c-9633-4e12-ab28-09ed60d51cb3";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
-        private Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>> _log;
+        private Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>> _logger;
         private HttpRequest _request;
-        private IResourceHelper _resourceHelper;
+        private ICosmosDBProvider _cosmosDbProvider;
         private IValidate _validate;
-        private ILoggerHelper _loggerHelper;
         private IHttpRequestHelper _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
-        private IJsonHelper _jsonHelper;
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
         private IGeoCodingService _geoCodingService;
         private Models.Session _session;
@@ -52,14 +48,11 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
             _request = new DefaultHttpContext().Request;
 
-            _log = new Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>>();
-            _resourceHelper = Substitute.For<IResourceHelper>();
-            _loggerHelper = Substitute.For<ILoggerHelper>();
+            _logger = new Mock<ILogger<PostSessionHttpTrigger.Function.PostSessionHttpTrigger>>();
+            _cosmosDbProvider = Substitute.For<ICosmosDBProvider>();
             _validate = Substitute.For<IValidate>();
             _httpRequestHelper = Substitute.For<IHttpRequestHelper>();
             _httpResponseMessageHelper = Substitute.For<IHttpResponseMessageHelper>();
-            _jsonHelper = Substitute.For<IJsonHelper>();
-            _resourceHelper = Substitute.For<IResourceHelper>();
             _geoCodingService = Substitute.For<IGeoCodingService>();
             _postSessionHttpTriggerService = Substitute.For<IPostSessionHttpTriggerService>();
             _dynamicHelper = new Mock<IDynamicHelper>();
@@ -68,9 +61,9 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _httpRequestHelper.GetDssApimUrl(_request).Returns("http://localhost:7071/");
             _httpRequestHelper.GetResourceFromRequest<Session>(_request).Returns(Task.FromResult(_session).Result);
 
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
-            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
-            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_resourceHelper, _validate, _postSessionHttpTriggerService, _loggerHelper, _httpRequestHelper, _httpResponseMessageHelper, _jsonHelper, _geoCodingService, _dynamicHelper.Object, _log.Object);
+            _cosmosDbProvider.DoesCustomerResourceExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
+            _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
+            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_cosmosDbProvider, _validate, _postSessionHttpTriggerService, _logger.Object, _httpRequestHelper, _httpResponseMessageHelper, _geoCodingService, _dynamicHelper.Object);
         }
 
         [Test]
@@ -146,7 +139,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         [Test]
         public async Task PostSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenCustomerDoesNotExist()
         {
-            _resourceHelper.DoesCustomerExist(Arg.Any<Guid>()).Returns(false);
+            _cosmosDbProvider.DoesCustomerResourceExist(Arg.Any<Guid>()).Returns(false);
 
             _httpResponseMessageHelper
                 .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));
@@ -160,7 +153,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         [Test]
         public async Task PostSessionHttpTrigger_ReturnsStatusCodeNoContent_WhenInteractionDoesNotExist()
         {
-            _resourceHelper.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
+            _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
             _httpResponseMessageHelper
                 .NoContent(Arg.Any<Guid>()).Returns(x => new HttpResponseMessage(HttpStatusCode.NoContent));

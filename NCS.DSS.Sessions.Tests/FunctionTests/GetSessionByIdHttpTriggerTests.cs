@@ -1,18 +1,17 @@
-﻿using DFC.Common.Standard.Logging;
-using DFC.HTTP.Standard;
+﻿using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NCS.DSS.Sessions.Cosmos.Helper;
+using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Service;
 using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Net;
 using System.Threading.Tasks;
-
+using GetSessionByIdHttpTriggerTest = NCS.DSS.Sessions.GetSessionByIdHttpTrigger.Function.GetSessionByIdHttpTrigger;
 namespace NCS.DSS.Sessions.Tests.FunctionTests
 {
     [TestFixture]
@@ -23,38 +22,33 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private const string ValidSessionId = "d5369b9a-6959-4bd3-92fc-1583e72b7e51";
         private const string InValidId = "1111111-2222-3333-4444-555555555555";
 
-        private Mock<ILogger<GetSessionByIdHttpTrigger.Function.GetSessionByIdHttpTrigger>> _log;
         private HttpRequest _request;
-        private Mock<IResourceHelper> _resourceHelper;
-        private Mock<ILoggerHelper> _loggerHelper;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
+        private Mock<ILogger<GetSessionByIdHttpTriggerTest>> _logger;
         private Mock<IHttpRequestHelper> _httpRequestHelper;
         private HttpResponseMessageHelper _httpResponseMessageHelper;
         private JsonHelper _jsonHelper;
         private Mock<IGetSessionByIdHttpTriggerService> _getSessionByIdHttpTriggerService;
         private Models.Session _session;
-        private GetSessionByIdHttpTrigger.Function.GetSessionByIdHttpTrigger _function;
+        private GetSessionByIdHttpTriggerTest _function;
 
         [SetUp]
         public void Setup()
         {
             _session = Substitute.For<Models.Session>();
             _request = new DefaultHttpContext().Request;
-            _log = new Mock<ILogger<GetSessionByIdHttpTrigger.Function.GetSessionByIdHttpTrigger>>();
-            _resourceHelper = new Mock<IResourceHelper>();
-            _loggerHelper = new Mock<ILoggerHelper>();
+            _logger = new Mock<ILogger<GetSessionByIdHttpTriggerTest>>();
             _httpRequestHelper = new Mock<IHttpRequestHelper>();
             _httpResponseMessageHelper = new HttpResponseMessageHelper();
             _jsonHelper = new JsonHelper();
-            _resourceHelper = new Mock<IResourceHelper>();
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
             _getSessionByIdHttpTriggerService = new Mock<IGetSessionByIdHttpTriggerService>();
-            _function = new GetSessionByIdHttpTrigger.Function.GetSessionByIdHttpTrigger(
-                _resourceHelper.Object,
+            _function = new GetSessionByIdHttpTriggerTest(
+                _cosmosDbProvider.Object,
                 _getSessionByIdHttpTriggerService.Object,
-                _loggerHelper.Object,
+                _logger.Object,
                 _httpRequestHelper.Object,
-                _httpResponseMessageHelper,
-                _jsonHelper,
-                _log.Object);
+                _httpResponseMessageHelper);
 
         }
 
@@ -114,7 +108,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(false));
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -128,7 +122,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         {
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(false);
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);
@@ -156,8 +150,8 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             // Arrange 
             _httpRequestHelper.Setup(x => x.GetDssTouchpointId(_request)).Returns("0000000001");
             _getSessionByIdHttpTriggerService.Setup(x => x.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_session));
-            _resourceHelper.Setup(x => x.DoesCustomerExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
-            _resourceHelper.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(true);
+            _cosmosDbProvider.Setup(x => x.DoesCustomerResourceExist(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _cosmosDbProvider.Setup(x => x.DoesInteractionResourceExistAndBelongToCustomer(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));
 
             // Act
             var result = await RunFunction(ValidCustomerId, ValidInteractionId, ValidSessionId);

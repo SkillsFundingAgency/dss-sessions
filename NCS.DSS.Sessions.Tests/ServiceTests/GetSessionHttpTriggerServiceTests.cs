@@ -14,21 +14,21 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
     public class GetSessionHttpTriggerServiceTests
     {
         private IGetSessionHttpTriggerService _getSessionHttpTriggerService;
-        private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
         private readonly Guid _customerId = Guid.Parse("58b43e3f-4a50-4900-9c82-a14682ee90fa");
 
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<IDocumentDBProvider>();
-            _getSessionHttpTriggerService = Substitute.For<GetSessionHttpTriggerService>(_documentDbProvider.Object);
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
+            _getSessionHttpTriggerService = Substitute.For<GetSessionHttpTriggerService>(_cosmosDbProvider.Object);
         }
 
         [Test]
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsNullWhenResourceCannotBeFound()
         {
             //Arrange
-            _documentDbProvider.Setup(x => x.GetSessionsForCustomerAsync(It.IsAny<Guid>())).Returns(Task.FromResult<List<Models.Session>>(null));
+            _cosmosDbProvider.Setup(x => x.GetSessionsForCustomerAsync(It.IsAny<Guid>())).Returns(Task.FromResult<List<Models.Session>>(null));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);
@@ -41,7 +41,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task GetSessionByIdHttpTriggerServiceTests_GetSessionForCustomerAsync_ReturnsResource()
         {
             //Arrange
-            _documentDbProvider.Setup(x => x.GetSessionsForCustomerAsync(_customerId)).Returns(Task.FromResult(new List<Models.Session>()));
+            _cosmosDbProvider.Setup(x => x.GetSessionsForCustomerAsync(_customerId)).Returns(Task.FromResult(new List<Models.Session>()));
 
             // Act
             var result = await _getSessionHttpTriggerService.GetSessionsAsync(_customerId);

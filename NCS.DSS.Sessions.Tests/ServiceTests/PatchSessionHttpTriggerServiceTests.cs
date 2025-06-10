@@ -1,17 +1,14 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
+﻿using Microsoft.Azure.Cosmos;
 using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
-using Newtonsoft.Json;
+using NCS.DSS.Sessions.ServiceBus;
 using NSubstitute;
 using NUnit.Framework;
 using System;
-using System.Collections.Specialized;
-using System.IO;
 using System.Net;
-using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NCS.DSS.Sessions.Tests.ServiceTests
@@ -23,7 +20,8 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         private readonly Guid _sessionId = Guid.Parse("7E467BDB-213F-407A-B86A-1954053D3C24");
         private IPatchSessionHttpTriggerService _sessionPatchHttpTriggerService;
         private Mock<ISessionPatchService> _sessionPatchService;
-        private Mock<IDocumentDBProvider> _documentDbProvider;
+        private Mock<ICosmosDBProvider> _cosmosDbProvider;
+        private Mock<ISessionsServiceBusClient> _serviceBusClient;
         private Session _session;
         private SessionPatch _sessionPatch;
 
@@ -32,12 +30,13 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         [SetUp]
         public void Setup()
         {
-            _documentDbProvider = new Mock<IDocumentDBProvider>();
+            _cosmosDbProvider = new Mock<ICosmosDBProvider>();
             _sessionPatchService = new Mock<ISessionPatchService>();
-            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_documentDbProvider.Object, _sessionPatchService.Object);
+            _serviceBusClient = new Mock<ISessionsServiceBusClient>();
+            _sessionPatchHttpTriggerService = new PatchSessionHttpTriggerService(_cosmosDbProvider.Object, _sessionPatchService.Object,_serviceBusClient.Object);
             _session = new Session();
             _sessionPatch = new SessionPatch() { VenuePostCode = "B33 9BX" };
-            _json = JsonConvert.SerializeObject(_sessionPatch);
+            _json = JsonSerializer.Serialize(_sessionPatch);
             _sessionPatchService.Setup(x => x.Patch(_json, _sessionPatch)).Returns(_session.ToString());
         }
 
@@ -66,7 +65,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeUpdated()
         {
             //Arrange
-            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ResourceResponse<Document>>(null));
+            _cosmosDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult<ItemResponse<Session>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -79,7 +78,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsNullWhenResourceCannotBeFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.CreateSessionAsync(_session)).Returns(Task.FromResult(new ResourceResponse<Document>(null)));
+            _cosmosDbProvider.Setup(x => x.CreateSessionAsync(_session)).Returns(Task.FromResult<ItemResponse<Session>>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -92,29 +91,10 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_UpdateCosmosAsync_ReturnsResourceWhenUpdated()
         {
             // Arrange
-            const string documentServiceResponseClass = "Microsoft.Azure.Documents.DocumentServiceResponse, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
-            const string dictionaryNameValueCollectionClass = "Microsoft.Azure.Documents.Collections.DictionaryNameValueCollection, Microsoft.Azure.DocumentDB.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
-
-            var resourceResponse = new ResourceResponse<Document>(new Document());
-            var documentServiceResponseType = Type.GetType(documentServiceResponseClass);
-
-            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-
-            var headers = new NameValueCollection { { "x-ms-request-charge", "0" } };
-
-            var headersDictionaryType = Type.GetType(dictionaryNameValueCollectionClass);
-
-            var headersDictionaryInstance = Activator.CreateInstance(headersDictionaryType, headers);
-
-            var arguments = new[] { Stream.Null, headersDictionaryInstance, HttpStatusCode.OK, null };
-
-            var documentServiceResponse = documentServiceResponseType.GetTypeInfo().GetConstructors(flags)[0].Invoke(arguments);
-
-            var responseField = typeof(ResourceResponse<Document>).GetTypeInfo().GetField("response", flags);
-
-            responseField?.SetValue(resourceResponse, documentServiceResponse);
-
-            _documentDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse));
+            var resourceResponse = new Mock<ItemResponse<Session>>();
+            resourceResponse.Setup(x => x.Resource).Returns(_session);
+            resourceResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+            _cosmosDbProvider.Setup(x => x.UpdateSessionAsync(It.IsAny<string>(), It.IsAny<Guid>())).Returns(Task.FromResult(resourceResponse.Object));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.UpdateCosmosAsync(_json, _sessionId);
@@ -129,7 +109,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsNullWhenResourceHasNotBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
+            _cosmosDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<string>(null));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(It.IsAny<Guid>(), It.IsAny<Guid>());
@@ -142,7 +122,7 @@ namespace NCS.DSS.Sessions.Tests.ServiceTests
         public async Task PatchSessionHttpTriggerServiceTests_GetActionPlanForCustomerAsync_ReturnsResourceWhenResourceHasBeenFound()
         {
             // Arrange
-            _documentDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
+            _cosmosDbProvider.Setup(x => x.GetSessionForCustomerToUpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult(_json));
 
             // Act
             var result = await _sessionPatchHttpTriggerService.GetSessionForCustomerAsync(Arg.Any<Guid>(), Arg.Any<Guid>());
