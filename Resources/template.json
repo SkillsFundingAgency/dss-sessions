@@ -17,7 +17,7 @@
         "cosmosDbDatabaseId": {
             "type": "string"
         },
-        "cosmosDbEndpoint": {
+        "CosmosDbEndpoint": {
             "type": "string"
         },
         "cosmosDbKey": {
@@ -77,7 +77,7 @@
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('appInsightsInstrumentationKey')]",
                 "AzureMapApiVersion": "[parameters('azureMapsApiVersion')]",
                 "AzureMapURL": "[parameters('azureMapsUrl')]",
-                "SessionConnectionString": "[concat('AccountEndpoint=', parameters('cosmosDbEndpoint'), '/;AccountKey=', parameters('cosmosDbKey'), ';')]",
+                "SessionConnectionString": "[concat('AccountEndpoint=', parameters('CosmosDbEndpoint'), '/;AccountKey=', parameters('cosmosDbKey'), ';')]",
                 "CollectionId": "[parameters('cosmosDbCollectionId')]",
                 "DatabaseId": "[parameters('cosmosDbDatabaseId')]",
                 "CustomerDatabaseId": "customers",
@@ -87,7 +87,8 @@
                 "AzureMapSubscriptionKey": "[parameters('azureMapsSubscriptionKey')]",
                 "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
                 "QueueName": "[parameters('serviceBusQueueName')]",
-                "AzureCountrySet": "GB"
+                "AzureCountrySet": "GB",
+                "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]"
             },
             "copy": {
                 "name": "FunctionAppSettingsCopy",
