@@ -5,9 +5,6 @@
         "azureMapsApiVersion": {
             "type": "string"
         },
-        "azureMapsSubscriptionKey": {
-            "type": "securestring"
-        },
         "azureMapsUrl": {
             "type": "string"
         },
@@ -25,9 +22,6 @@
         },
         "functionAppNames": {
             "type": "array"
-        },
-        "serviceBusConnectionString": {
-            "type": "string"
         },
         "serviceBusQueueName": {
             "type": "string"
@@ -80,8 +74,8 @@
                 "CustomerCollectionId": "customers",
                 "InteractionDatabaseId": "interactions",
                 "InteractionCollectionId": "interactions",
-                "AzureMapSubscriptionKey": "[parameters('azureMapsSubscriptionKey')]",
-                "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
+                "AzureMapSubscriptionKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=AzureMapsAccessKey)', parameters('keyVaultName'))]",
+                "ServiceBusConnectionString": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=ServiceBusConnectionString)', parameters('keyVaultName'))]",
                 "QueueName": "[parameters('serviceBusQueueName')]",
                 "AzureCountrySet": "GB",
                 "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]"
