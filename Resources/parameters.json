@@ -5,9 +5,6 @@
         "azureMapsApiVersion": {
             "value": "__AzureMapsApiVersion__"
         },
-        "azureMapsSubscriptionKey": {
-            "value": "__AzureMapsSubscriptionKey__"
-        },
         "azureMapsUrl": {
             "value": "__AzureMapsUrl__"
         },
@@ -25,9 +22,6 @@
         },
         "functionAppNames": {
             "value": "__NotTokenised__"
-        },
-        "serviceBusConnectionString": {
-            "value": "__ServiceBusConnectionString__"
         },
         "serviceBusQueueName": {
             "value": "__ServiceBusQueueName__"
