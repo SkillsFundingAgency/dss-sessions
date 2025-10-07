@@ -36,11 +36,11 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                     var response = await queryCust.ReadNextAsync();
                     if (response != null)
                     {
-                        _logger.LogInformation("Customer Record found in Cosmos DB for {CustomerID}", customerId);
+                        _logger.LogTrace("Customer Record found in Cosmos DB for {CustomerID}", customerId);
                         return true;
                     }
                 }
-                _logger.LogWarning("No Customer Record found with {CustomerID} in Cosmos DB", customerId);
+                _logger.LogInformation("No Customer Record found with {CustomerID} in Cosmos DB", customerId);
                 return false;
             }
             catch (CosmosException ce)
@@ -62,11 +62,11 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                     var response = await queryInt.ReadNextAsync();
                     if (response != null && response.Resource.Any())
                     {
-                        _logger.LogInformation("Interaction Record found with ID {InteractionId} in Cosmos DB for Customer with ID {CustomerID}", interactionId, customerId);
+                        _logger.LogTrace("Interaction Record found with ID {InteractionId} in Cosmos DB for Customer with ID {CustomerID}", interactionId, customerId);
                         return true;
                     }
                 }
-                _logger.LogWarning("No Interaction found with ID {InteractionId} and Customer ID {CustomerID} in Cosmos DB", interactionId, customerId);
+                _logger.LogInformation("No Interaction found with ID {InteractionId} and Customer ID {CustomerID} in Cosmos DB", interactionId, customerId);
                 return false;
             }
             catch (CosmosException ce)
@@ -87,10 +87,10 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                 {
                     var response = await queryCust.ReadNextAsync();
                     var tDate = response.Resource.FirstOrDefault().DateOfTermination;
-                    _logger.LogInformation("Customer with {CustomerID} Have a termination date of {tDate} ", customerId, tDate);
+                    _logger.LogTrace("Customer with {CustomerID} Have a termination date of {tDate} ", customerId, tDate);
                     return tDate.HasValue;
                 }
-                _logger.LogWarning("No Customer Record found with {CustomerID} in Cosmos DB", customerId);
+                _logger.LogInformation("No Customer Record found with {CustomerID} in Cosmos DB", customerId);
                 return false;
             }
             catch (CosmosException ce)
@@ -111,11 +111,11 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                     var response = await queryCdb.ReadNextAsync();
                     if (response != null && response.Resource.Any())
                     {
-                        _logger.LogInformation("Interaction Records found in Cosmos DB for Customer with ID {CustomerID}", customerId);
+                        _logger.LogTrace("Interaction Records found in Cosmos DB for Customer with ID {CustomerID}", customerId);
                         return response.Resource.ToList();
                     }
                 }
-                _logger.LogWarning("No Interaction found with {CustomerID} in Cosmos DB", customerId);
+                _logger.LogInformation("No Interaction found with {CustomerID} in Cosmos DB", customerId);
                 return null;
             }
             catch (CosmosException ce)
@@ -136,11 +136,11 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                     var response = await queryCdb.ReadNextAsync();
                     if (response != null && response.Resource.Any())
                     {
-                        _logger.LogInformation("Session Record found with ID {SessionId} in Cosmos DB for Customer with ID {CustomerID}",sessionId, customerId);
+                        _logger.LogTrace("Session Record found with ID {SessionId} in Cosmos DB for Customer with ID {CustomerID}",sessionId, customerId);
                         return response.Resource.FirstOrDefault();
                     }
                 }
-                _logger.LogWarning("No Session found with ID {SessionId} for Customer with {CustomerID} in Cosmos DB", sessionId, customerId);
+                _logger.LogInformation("No Session found with ID {SessionId} for Customer with {CustomerID} in Cosmos DB", sessionId, customerId);
                 return null;
             }
             catch (CosmosException ce)
@@ -162,11 +162,11 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                     if (response != null && response.Resource.Any())
                     {
                         var jsonString = JsonSerializer.Serialize(response.Resource.FirstOrDefault());
-                        _logger.LogInformation("Session Record found with ID {SessionId} in Cosmos DB for Customer with ID {CustomerID}", sessionId, customerId);
+                        _logger.LogTrace("Session Record found with ID {SessionId} in Cosmos DB for Customer with ID {CustomerID}", sessionId, customerId);
                         return jsonString;
                     }
                 }
-                _logger.LogWarning("No Session found with ID {SessionId} for Customer with {CustomerID} in Cosmos DB", sessionId, customerId);
+                _logger.LogInformation("No Session found with ID {SessionId} for Customer with {CustomerID} in Cosmos DB", sessionId, customerId);
                 return null;
             }
             catch (CosmosException ce)
@@ -183,7 +183,7 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                 var response = await _container.CreateItemAsync(session, null);
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    _logger.LogInformation("Session Record Created in Cosmos DB for {SessionId}", session.SessionId);
+                    _logger.LogTrace("Session Record Created in Cosmos DB for {SessionId}", session.SessionId);
                 }
                 else
                 {
@@ -207,7 +207,7 @@ namespace NCS.DSS.Sessions.Cosmos.Provider
                 var response = await _container.ReplaceItemAsync(session, sessionId.ToString());
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    _logger.LogInformation("Session Record Updated in Cosmos DB for {SessionId}", session.SessionId);
+                    _logger.LogTrace("Session Record Updated in Cosmos DB for {SessionId}", session.SessionId);
                 }
                 else
                 {

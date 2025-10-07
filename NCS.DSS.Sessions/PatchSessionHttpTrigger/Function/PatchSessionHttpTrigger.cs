@@ -62,12 +62,9 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
         {
             var functionName = nameof(PatchSessionHttpTrigger);
 
-            _logger.LogInformation("Function {FunctionName} has been invoked", functionName);
+            _logger.LogTrace("Function {FunctionName} has been invoked", functionName);
 
             var correlationId = _httpRequestHelper.GetDssCorrelationId(req);
-            if (string.IsNullOrEmpty(correlationId))
-                _logger.LogInformation("Unable to locate 'DssCorrelationId' in request header");
-
             if (!Guid.TryParse(correlationId, out var correlationGuid))
             {
                 _logger.LogInformation("Unable to parse 'DssCorrelationId' to a Guid");
@@ -77,7 +74,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(touchpointId))
             {
                 var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'TouchpointId' in request header", correlationId, response.StatusCode);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'TouchpointId' in request header", correlationId, response.StatusCode);
                 return response;
             }
 
@@ -85,7 +82,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (string.IsNullOrEmpty(ApimURL))
             {
                 var response = new BadRequestObjectResult(HttpStatusCode.BadRequest);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'apimurl' in request header", correlationId, response.StatusCode);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to locate 'apimurl' in request header", correlationId, response.StatusCode);
                 return response;
             }
 
@@ -96,31 +93,31 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (!Guid.TryParse(customerId, out var customerGuid))
             {
                 var response = new BadRequestObjectResult(customerGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: {customerId}",correlationId,response.StatusCode,customerId);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'customerId' to a Guid: {customerId}",correlationId,response.StatusCode,customerId);
                 return response;
             }
 
             if (!Guid.TryParse(interactionId, out var interactionGuid))
             {
                 var response = new BadRequestObjectResult(interactionGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'interactionId' to a Guid: {interactionId}", correlationId, response.StatusCode,interactionId);
                 return response;
             }
 
             if (!Guid.TryParse(sessionId, out var sessionGuid))
             {
                 var response = new BadRequestObjectResult(sessionGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'sessionId' to a Guid: {SessionId}", correlationId, response.StatusCode,sessionGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to parse 'sessionId' to a Guid: {SessionId}", correlationId, response.StatusCode,sessionGuid);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Input validation has succeeded.", correlationId);
+            _logger.LogTrace("{CorrelationId} Input validation has succeeded.", correlationId);
 
             SessionPatch sessionPatchRequest;
 
             try
             {
-                _logger.LogInformation("{CorrelationId} Attempt to get resource from body of the request",correlationId);
+                _logger.LogTrace("{CorrelationId} Attempt to get resource from body of the request",correlationId);
                 sessionPatchRequest = await _httpRequestHelper.GetResourceFromRequest<SessionPatch>(req);
             }
             catch (Exception ex)
@@ -133,14 +130,14 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             if (sessionPatchRequest == null)
             {
                 var response = new UnprocessableEntityObjectResult(req);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. session patch request is null", correlationId, response.StatusCode);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. session patch request is null", correlationId, response.StatusCode);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempt to set id's for session patch",correlationId);
+            _logger.LogTrace("{CorrelationId} Attempt to set id's for session patch",correlationId);
             sessionPatchRequest.SetIds(touchpointId, subcontractorId);
 
-            _logger.LogInformation("{CorrelationId} Attempt to validate resource",correlationId);
+            _logger.LogTrace("{CorrelationId} Attempt to validate resource",correlationId);
             var errors = _validate.ValidateResource(sessionPatchRequest);
 
             if (errors != null && errors.Any())
@@ -150,21 +147,19 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if customer exists {CustomerId}",correlationId,customerGuid);
+            _logger.LogTrace("{CorrelationId} Attempting to see if customer exists {CustomerId}",correlationId,customerGuid);
             var doesCustomerExist = await _cosmosDbProvider.DoesCustomerResourceExist(customerGuid);
 
             if (!doesCustomerExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist {CustomerId}",correlationId,customerGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Customer does not exist {CustomerId}",correlationId,customerGuid);
                 return response;
             }
-            else
-            {
-                _logger.LogInformation("{CorrelationId} Customer record found in Cosmos DB {customerGuid}", correlationId, customerGuid);
-            }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if this is a read only customer {CustomerId}",correlationId,customerGuid);
+            _logger.LogTrace("{CorrelationId} Customer record found in Cosmos DB {customerGuid}", correlationId, customerGuid);
+
+            _logger.LogTrace("{CorrelationId} Attempting to see if this is a read only customer {CustomerId}",correlationId,customerGuid);
             var isCustomerReadOnly = await _cosmosDbProvider.DoesCustomerHaveATerminationDate(customerGuid);
 
             if (isCustomerReadOnly)
@@ -173,31 +168,29 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
                 {
                     StatusCode = (int)HttpStatusCode.Forbidden
                 };
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Customer is read only {CustomerId}", correlationId, response.StatusCode,customerGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Customer is read only {CustomerId}", correlationId, response.StatusCode,customerGuid);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to see if interaction exists {InteractionId}",correlationId,interactionGuid);
+            _logger.LogTrace("{CorrelationId} Attempting to see if interaction exists {InteractionId}",correlationId,interactionGuid);
             var doesInteractionExist = await _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(interactionGuid, customerGuid);
 
             if (!doesInteractionExist)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {InteractionId}",correlationId, response.StatusCode,interactionGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Interaction does not exist {InteractionId}",correlationId, response.StatusCode,interactionGuid);
                 return response;
             }
-            else
-            {
-                _logger.LogInformation("{CorrelationId} Interaction record with {interactionGuid} found in Cosmos DB for Customer {customerGuid}", correlationId, interactionGuid, customerGuid);
-            }
 
-            _logger.LogInformation("{CorrelationId} Attempting to get sessions for customer {CustomerId}",correlationId,customerGuid);
+            _logger.LogTrace("{CorrelationId} Interaction record with {interactionGuid} found in Cosmos DB for Customer {customerGuid}", correlationId, interactionGuid, customerGuid);
+
+            _logger.LogTrace("{CorrelationId} Attempting to get sessions for customer {CustomerId}",correlationId,customerGuid);
             var sessionForCustomer = await _sessionPatchService.GetSessionForCustomerAsync(customerGuid, sessionGuid);
 
             if (sessionForCustomer == null)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Session does not exist {SessionId}", correlationId, response.StatusCode,sessionGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Session does not exist {SessionId}", correlationId, response.StatusCode,sessionGuid);
                 return response;
             }
 
@@ -222,36 +215,35 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             {
                 _logger.LogInformation("{CorrelationId} Postcode is Null or Empty. Unable to get long and lat.", correlationId);
             }
-            _logger.LogInformation("{CorrelationId} Attempting to Patch Session {SessionId}",correlationId,sessionGuid);
+            _logger.LogTrace("{CorrelationId} Attempting to Patch Session {SessionId}",correlationId,sessionGuid);
             var patchedSession = _sessionPatchService.PatchResource(sessionForCustomer, sessionPatchRequest);
 
             if (patchedSession == null)
             {
                 var response = new NoContentResult();
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Unable to Patch Session {SessionId}", correlationId, response.StatusCode,sessionGuid);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Unable to Patch Session {SessionId}", correlationId, response.StatusCode,sessionGuid);
                 return response;
             }
 
-            _logger.LogInformation("{CorrelationId} Attempting to update Session {SessionId}",correlationId,sessionGuid);
+            _logger.LogTrace("{CorrelationId} Attempting to update Session {SessionId}",correlationId,sessionGuid);
             var updatedSession = await _sessionPatchService.UpdateCosmosAsync(patchedSession, sessionGuid);
 
             if (updatedSession == null)
             {
                 var response = new BadRequestObjectResult(sessionGuid);
-                _logger.LogWarning("{CorrelationId} Response Status Code: {StatusCode}. Failed to patch the session {SessionId}", correlationId, response.StatusCode,sessionGuid);
-                _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
+                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Failed to patch the session {SessionId}", correlationId, response.StatusCode,sessionGuid);
                 return response;
             }
             else
             { 
-                _logger.LogInformation("{CorrelationId} Attempting to send to service bus {SessionId}",correlationId,sessionGuid);
+                _logger.LogTrace("{CorrelationId} Attempting to send to service bus {SessionId}",correlationId,sessionGuid);
                 await _sessionPatchService.SendToServiceBusQueueAsync(updatedSession, customerGuid, ApimURL);
                 var response = new JsonResult(updatedSession, new JsonSerializerOptions())
                 {
                     StatusCode = (int)HttpStatusCode.OK
                 };
-                _logger.LogInformation("{CorrelationId} Response Status Code: {StatusCode}. Successfully patched the session {SessionId}", correlationId, response.StatusCode,sessionGuid);
-                _logger.LogInformation("Function {FunctionName} has finished invoking", functionName);
+                _logger.LogTrace("{CorrelationId} Response Status Code: {StatusCode}. Successfully patched the session {SessionId}", correlationId, response.StatusCode,sessionGuid);
+                _logger.LogTrace("Function {FunctionName} has finished invoking", functionName);
                 return response;
             }
         }
