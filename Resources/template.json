@@ -5,9 +5,6 @@
         "azureMapsApiVersion": {
             "type": "string"
         },
-        "azureMapsSubscriptionKey": {
-            "type": "securestring"
-        },
         "azureMapsUrl": {
             "type": "string"
         },
@@ -20,17 +17,11 @@
         "CosmosDbEndpoint": {
             "type": "string"
         },
-        "cosmosDbKey": {
-            "type": "securestring"
-        },
         "environmentName": {
             "type": "string"
         },
         "functionAppNames": {
             "type": "array"
-        },
-        "serviceBusConnectionString": {
-            "type": "string"
         },
         "serviceBusQueueName": {
             "type": "string"
@@ -77,15 +68,14 @@
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('appInsightsInstrumentationKey')]",
                 "AzureMapApiVersion": "[parameters('azureMapsApiVersion')]",
                 "AzureMapURL": "[parameters('azureMapsUrl')]",
-                "SessionConnectionString": "[concat('AccountEndpoint=', parameters('CosmosDbEndpoint'), '/;AccountKey=', parameters('cosmosDbKey'), ';')]",
                 "CollectionId": "[parameters('cosmosDbCollectionId')]",
                 "DatabaseId": "[parameters('cosmosDbDatabaseId')]",
                 "CustomerDatabaseId": "customers",
                 "CustomerCollectionId": "customers",
                 "InteractionDatabaseId": "interactions",
                 "InteractionCollectionId": "interactions",
-                "AzureMapSubscriptionKey": "[parameters('azureMapsSubscriptionKey')]",
-                "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
+                "AzureMapSubscriptionKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=AzureMapsAccessKey)', parameters('keyVaultName'))]",
+                "ServiceBusConnectionString": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=ServiceBusConnectionString)', parameters('keyVaultName'))]",
                 "QueueName": "[parameters('serviceBusQueueName')]",
                 "AzureCountrySet": "GB",
                 "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]"

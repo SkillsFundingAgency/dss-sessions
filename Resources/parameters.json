@@ -5,9 +5,6 @@
         "azureMapsApiVersion": {
             "value": "__AzureMapsApiVersion__"
         },
-        "azureMapsSubscriptionKey": {
-            "value": "__AzureMapsSubscriptionKey__"
-        },
         "azureMapsUrl": {
             "value": "__AzureMapsUrl__"
         },
@@ -20,17 +17,11 @@
         "CosmosDbEndpoint": {
             "value": "__CosmosDbEndpoint__"
         },
-        "cosmosDbKey": {
-            "value": "__CosmosDbKey__"
-        },
         "environmentName": {
             "value": "__NotTokenised__"
         },
         "functionAppNames": {
             "value": "__NotTokenised__"
-        },
-        "serviceBusConnectionString": {
-            "value": "__ServiceBusConnectionString__"
         },
         "serviceBusQueueName": {
             "value": "__ServiceBusQueueName__"
