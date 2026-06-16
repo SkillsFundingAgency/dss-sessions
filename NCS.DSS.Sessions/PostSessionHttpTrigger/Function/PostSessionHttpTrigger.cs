@@ -116,7 +116,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             }
             catch (Exception ex)
             {
-                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite"]));
+                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite", "StackTrace"]));
                 _logger.LogError(ex,"{CorrelationId} Response Status Code: {StatusCode}. Unable to retrieve body from req {Exception}", correlationId, response.StatusCode, ex.Message);
                 return response;
             }
