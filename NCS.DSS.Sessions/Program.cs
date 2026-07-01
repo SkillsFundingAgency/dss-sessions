@@ -18,6 +18,7 @@ using NCS.DSS.Sessions.GetSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
+using NCS.DSS.Sessions.PostCodeSearch;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.ServiceBus;
 using NCS.DSS.Sessions.Validation;
@@ -57,6 +58,14 @@ namespace NCS.DSS.Sessions
                     services.AddTransient<ISessionPatchService, SessionPatchService>();
                     services.AddScoped<IAzureMapService, AzureMapService>();
                     services.AddScoped<IGeoCodingService, GeoCodingService>();
+                    services.Configure<PostCodeSearchServiceOptions>(configuration.GetSection("GetPostCodeSettings"));
+                    services.AddSingleton<IPostCodeSearchService>(s =>
+                    {
+                        var logger = s.GetRequiredService<ILogger<PostCodeSearchService>>();
+                        var getPostCodeOptions = s.GetRequiredService<IOptions<PostCodeSearchServiceOptions>>();
+                        var azureMapService = s.GetRequiredService<IAzureMapService>();
+                        return new PostCodeSearchService(s.GetRequiredService<HttpClient>(), getPostCodeOptions, azureMapService, logger);                        
+                    });
                     services.AddSingleton(sp =>
                     {
                         var logger = sp.GetRequiredService<ILogger<Program>>();

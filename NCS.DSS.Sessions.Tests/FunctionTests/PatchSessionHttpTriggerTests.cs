@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
-using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
 using NCS.DSS.Sessions.PatchSessionHttpTrigger.Service;
+using NCS.DSS.Sessions.PostCodeSearch;
 using NCS.DSS.Sessions.Validation;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -31,7 +31,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private Mock<IHttpRequestHelper> _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private Mock<IPatchSessionHttpTriggerService> _patchSessionHttpTriggerService;
-        private Mock<IGeoCodingService> _geoCodingService;
+        private Mock<IPostCodeSearchService> _postCodeSearchService;
         private Session _session;
         private SessionPatch _sessionPatch;
         private string _sessionString;
@@ -52,7 +52,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _httpResponseMessageHelper = new HttpResponseMessageHelper();
             _validate = new Validate();
             _patchSessionHttpTriggerService = new Mock<IPatchSessionHttpTriggerService>();
-            _geoCodingService = new Mock<IGeoCodingService>();
+            _postCodeSearchService = new Mock<IPostCodeSearchService>();
             _sessionString = JsonConvert.SerializeObject(_session);
             _dynamicHelper = new Mock<IDynamicHelper>();
             _function = new PatchSessionHttpTrigger.Function.PatchSessionHttpTrigger(
@@ -62,7 +62,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
                 _logger.Object,
                 _httpRequestHelper.Object,
                 _httpResponseMessageHelper,
-                _geoCodingService.Object,
+                _postCodeSearchService.Object,
                 _dynamicHelper.Object);
         }
 

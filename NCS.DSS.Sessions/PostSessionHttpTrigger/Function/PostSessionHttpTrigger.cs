@@ -9,6 +9,7 @@ using NCS.DSS.Sessions.Cosmos.Provider;
 using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
+using NCS.DSS.Sessions.PostCodeSearch;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 using System.ComponentModel.DataAnnotations;
@@ -25,7 +26,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
         private ILogger<PostSessionHttpTrigger> _logger;
         private IHttpRequestHelper _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
-        private IGeoCodingService _geoCodingService;
+        private IPostCodeSearchService _postCodeSearchService;
         private IDynamicHelper _dynamicHelper;
 
         public PostSessionHttpTrigger(ICosmosDBProvider cosmosDbProvider,
@@ -34,7 +35,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             ILogger<PostSessionHttpTrigger> logger,
             IHttpRequestHelper httpRequestHelper,
             IHttpResponseMessageHelper httpResponseMessageHelper,
-            IGeoCodingService geoCodingService,
+            IPostCodeSearchService postCodeSearchService,
             IDynamicHelper dynamicHelper)
         {
             _cosmosDbProvider = cosmosDbProvider;
@@ -43,7 +44,7 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             _logger = logger;
             _httpRequestHelper = httpRequestHelper;
             _httpResponseMessageHelper = httpResponseMessageHelper;
-            _geoCodingService = geoCodingService;
+            _postCodeSearchService = postCodeSearchService;
             _dynamicHelper = dynamicHelper;
         }
 
@@ -180,11 +181,11 @@ namespace NCS.DSS.Sessions.PostSessionHttpTrigger.Function
             _logger.LogTrace("{CorrelationId} Attempting to get long and lat for postcode",correlationId);
             if (!string.IsNullOrEmpty(sessionRequest.VenuePostCode))
             {
-                Position position;
+                AddressPosition position;
                 try
                 {
                     var postcode = sessionRequest.VenuePostCode.Replace(" ", string.Empty);
-                    position = await _geoCodingService.GetPositionForPostcodeAsync(postcode);
+                    position = await _postCodeSearchService.GetPositionForPostcodeAsync(postcode);
                 }
                 catch (Exception e)
                 {

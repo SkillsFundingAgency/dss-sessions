@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NCS.DSS.Sessions.Cosmos.Provider;
-using NCS.DSS.Sessions.GeoCoding;
 using NCS.DSS.Sessions.Helpers;
 using NCS.DSS.Sessions.Models;
+using NCS.DSS.Sessions.PostCodeSearch;
 using NCS.DSS.Sessions.PostSessionHttpTrigger.Service;
 using NCS.DSS.Sessions.Validation;
 using Newtonsoft.Json;
@@ -35,7 +35,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
         private IHttpRequestHelper _httpRequestHelper;
         private IHttpResponseMessageHelper _httpResponseMessageHelper;
         private IPostSessionHttpTriggerService _postSessionHttpTriggerService;
-        private IGeoCodingService _geoCodingService;
+        private IPostCodeSearchService _postCodeSearchService;
         private Models.Session _session;
         private PostSessionHttpTrigger.Function.PostSessionHttpTrigger _function;
         private Mock<IDynamicHelper> _dynamicHelper;
@@ -53,7 +53,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
             _validate = Substitute.For<IValidate>();
             _httpRequestHelper = Substitute.For<IHttpRequestHelper>();
             _httpResponseMessageHelper = Substitute.For<IHttpResponseMessageHelper>();
-            _geoCodingService = Substitute.For<IGeoCodingService>();
+            _postCodeSearchService = Substitute.For<IPostCodeSearchService>();
             _postSessionHttpTriggerService = Substitute.For<IPostSessionHttpTriggerService>();
             _dynamicHelper = new Mock<IDynamicHelper>();
 
@@ -63,7 +63,7 @@ namespace NCS.DSS.Sessions.Tests.FunctionTests
 
             _cosmosDbProvider.DoesCustomerResourceExist(Arg.Any<Guid>()).ReturnsForAnyArgs(true);
             _cosmosDbProvider.DoesInteractionResourceExistAndBelongToCustomer(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
-            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_cosmosDbProvider, _validate, _postSessionHttpTriggerService, _logger.Object, _httpRequestHelper, _httpResponseMessageHelper, _geoCodingService, _dynamicHelper.Object);
+            _function = new PostSessionHttpTrigger.Function.PostSessionHttpTrigger(_cosmosDbProvider, _validate, _postSessionHttpTriggerService, _logger.Object, _httpRequestHelper, _httpResponseMessageHelper, _postCodeSearchService, _dynamicHelper.Object);
         }
 
         [Test]
