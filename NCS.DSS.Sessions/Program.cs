@@ -59,6 +59,7 @@ namespace NCS.DSS.Sessions
                     services.AddScoped<IAzureMapService, AzureMapService>();
                     services.AddScoped<IGeoCodingService, GeoCodingService>();
                     services.Configure<PostCodeSearchServiceOptions>(configuration.GetSection("GetPostCodeSettings"));
+                    services.AddTransient((provider) => new HttpClient());
                     services.AddSingleton<IPostCodeSearchService>(s =>
                     {
                         var logger = s.GetRequiredService<ILogger<PostCodeSearchService>>();
