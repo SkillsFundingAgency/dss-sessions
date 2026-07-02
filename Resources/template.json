@@ -79,12 +79,9 @@
             "QueueName": "[parameters('serviceBusQueueName')]",
             "AzureCountrySet": "GB",
             "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]",
-            "GetPostCodeSettings": {
-              "UseOsApi": "true",
-              "ApiUrl": "https://api.os.uk/search/places/v1/postcode?postcode={0}&dataset=DPA",
-              "ApiKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=GetPostCodeApiKey)', parameters('keyVaultName'))]"
-            }
-
+            "GetPostCodeSettings__UseOsApi": "true",
+            "GetPostCodeSettings__ApiUrl": "https://api.os.uk/search/places/v1/postcode?postcode={0}&dataset=DPA",
+            "GetPostCodeSettings__ApiKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=GetPostCodeApiKey)', parameters('keyVaultName'))]"
           },
             "copy": {
                 "name": "FunctionAppSettingsCopy",
