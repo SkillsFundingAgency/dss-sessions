@@ -80,7 +80,7 @@
             "AzureCountrySet": "GB",
             "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]",
             "GetPostCodeSettings": {
-              "UseOsApi": true,
+              "UseOsApi": "true",
               "ApiUrl": "https://api.os.uk/search/places/v1/postcode?postcode={0}&dataset=DPA",
               "ApiKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=GetPostCodeApiKey)', parameters('keyVaultName'))]"
             }
