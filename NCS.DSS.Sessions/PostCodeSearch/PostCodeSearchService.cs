@@ -33,6 +33,7 @@ namespace NCS.DSS.Sessions.PostCodeSearch
             }
             if (_options.UseOsApi)
             {
+                _logger.LogInformation($"PostCodeSearchService is configrued to use OS API to find position for postcode: {postcode}");
                 var result = await FindAddresses(postcode);
                 return result?.Results?.Select(resultItem =>
                 {
@@ -45,6 +46,8 @@ namespace NCS.DSS.Sessions.PostCodeSearch
                         longitude = dpa.Longitude;
                         latitude = dpa.Latitude;
                     }
+
+                    _logger.LogInformation($"PostCodeSearchService is returning position for postcode: {postcode} with longitude: {longitude} and latitude: {latitude}");
                     return new AddressPosition
                     {
                         Longitude = longitude,
@@ -58,7 +61,9 @@ namespace NCS.DSS.Sessions.PostCodeSearch
             }
             else
             {
+                _logger.LogInformation($"PostCodeSearchService is configrued to use Azure Maps Service to find position for postcode: {postcode}");
                 var position = await _azureMapService.GetPositionForAddress(postcode);
+                _logger.LogInformation($"PostCodeSearchService is returning position for postcode: {postcode} with longitude: {position.Lon} and latitude: {position.Lat}");
                 return new AddressPosition
                 {
                     Longitude = position.Lon,
