@@ -1,8 +1,8 @@
-using DFC.GeoCoding.Standard.AzureMaps.Model;
 using DFC.JSON.Standard.Attributes;
 using DFC.Swagger.Standard.Annotations;
 using NCS.DSS.Sessions.ReferenceData;
 using System.ComponentModel.DataAnnotations;
+using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
 
 namespace NCS.DSS.Sessions.Models
 {
@@ -91,10 +91,12 @@ namespace NCS.DSS.Sessions.Models
         public void SetLongitudeAndLatitude(Position position)
         {
             if (position == null)
+            {
                 return;
+            }
 
-            Longitude = (decimal)position.Lon;
-            Latitude = (decimal)position.Lat;
+            Longitude = (decimal)position.Longitude;
+            Latitude = (decimal)position.Latitude;
 
         }
     }

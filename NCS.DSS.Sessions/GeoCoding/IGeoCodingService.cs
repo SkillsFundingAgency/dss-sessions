@@ -1,4 +1,4 @@
-﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
+﻿using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
 
 namespace NCS.DSS.Sessions.GeoCoding
 {
