@@ -7,14 +7,14 @@ namespace NCS.DSS.Sessions.GeoCoding
 
     public class GeoCodingService : IGeoCodingService
     {
-        private ILogger<GeoCodingService> _logger;
+        private readonly ILogger<GeoCodingService> _logger;
 
         private readonly IOSService _OSService;
 
-        public GeoCodingService(IOSService _OSService, ILogger<GeoCodingService> logger)
+        public GeoCodingService(IOSService OSService, ILogger<GeoCodingService> logger)
         {
             _logger = logger;
-            _OSService = _OSService;
+            _OSService = OSService;
         }
 
         public async Task<Position> GetPositionForPostcodeAsync(string postcode)
