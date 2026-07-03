@@ -41,6 +41,7 @@ namespace NCS.DSS.Sessions
                 .ConfigureServices((context, services) =>
                 {
                     var configuration = context.Configuration;
+                    services.AddHttpClient();
                     services.AddOptions<SessionsConfigurationSettings>()
                         .Bind(configuration);
                     services.Configure<OSServiceOptions>(options =>
