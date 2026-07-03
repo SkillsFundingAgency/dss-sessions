@@ -69,7 +69,7 @@
                 "ServiceBusConnectionString": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=ServiceBusConnectionString)', parameters('keyVaultName'))]",
                 "QueueName": "[parameters('serviceBusQueueName')]",
                 "AzureCountrySet": "GB",
-                "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]"
+                "CosmosDbEndpoint": "[parameters('CosmosDbEndpoint')]",
 				"OSServiceApiUrl": "https://api.os.uk/search/places/v1/postcode?postcode={0}&dataset=DPA&output_srs=WGS84",
 				"OSServiceApiKey": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=GetPostCodeApiKey)', parameters('keyVaultName'))]"
             },
