@@ -2,6 +2,7 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using DFC.GeoCoding.Standard.AzureMaps.Service;
 using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
+using DFC.GeoCoding.Standard.OrdnanceSurvey.Services;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using DFC.Swagger.Standard;
@@ -63,6 +64,7 @@ namespace NCS.DSS.Sessions
                     services.AddSingleton<IJsonHelper, JsonHelper>();
                     services.AddTransient<ISessionPatchService, SessionPatchService>();
                     services.AddScoped<IAzureMapService, AzureMapService>();
+                    services.AddScoped<IOSService, OSService>();
                     services.AddScoped<IGeoCodingService, GeoCodingService>();
                     services.AddSingleton(sp =>
                     {
