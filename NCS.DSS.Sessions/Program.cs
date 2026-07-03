@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using DFC.GeoCoding.Standard.AzureMaps.Service;
+using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
 using DFC.HTTP.Standard;
 using DFC.JSON.Standard;
 using DFC.Swagger.Standard;
@@ -41,6 +42,12 @@ namespace NCS.DSS.Sessions
                     var configuration = context.Configuration;
                     services.AddOptions<SessionsConfigurationSettings>()
                         .Bind(configuration);
+                    services.Configure<OSServiceOptions>(options =>
+                    {
+                        var settings = configuration.Get<SessionsConfigurationSettings>();
+                        options.ApiUrl = settings.OSServiceApiUrl;
+                        options.ApiKey = settings.OSServiceApiKey;
+                    });
                     services.AddApplicationInsightsTelemetryWorkerService();
                     services.ConfigureFunctionsApplicationInsights();
                     services.AddLogging();
