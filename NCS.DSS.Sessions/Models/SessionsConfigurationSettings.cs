@@ -18,5 +18,9 @@ namespace NCS.DSS.Sessions.Models
         public string InteractionDatabaseId { get; set; }
         public string QueueName { get; set; }
         public string ServiceBusConnectionString { get; set; }
+
+        // Ordnance Survey Service Settings
+        public string OSServiceApiUrl { get; set; }
+        public string OSServiceApiKey { get; set; }
     }
 }
