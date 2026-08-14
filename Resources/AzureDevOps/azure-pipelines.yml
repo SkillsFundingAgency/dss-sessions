@@ -9,7 +9,7 @@ resources:
   - repository: dfc-devops
     type: github
     name: SkillsFundingAgency/dfc-devops
-    ref: refs/tags/v1.16.7
+    ref: refs/heads/master
     endpoint: 'GitHub (CDH)'
   
 pool:
