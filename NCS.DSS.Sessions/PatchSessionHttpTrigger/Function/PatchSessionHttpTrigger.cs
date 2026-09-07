@@ -1,6 +1,5 @@
-﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
+﻿using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
 using DFC.HTTP.Standard;
-using DFC.JSON.Standard;
 using DFC.Swagger.Standard.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -122,7 +121,7 @@ namespace NCS.DSS.Sessions.PatchSessionHttpTrigger.Function
             }
             catch (Exception ex)
             {
-                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite"]));
+                var response = new UnprocessableEntityObjectResult(_dynamicHelper.ExcludeProperty(ex, ["TargetSite", "StackTrace"]));
                 _logger.LogError(ex,"{CorrelationId} Response Status Code: {StatusCode}. Unable to retrieve body from req", correlationId, response.StatusCode);
                 return response;
             }

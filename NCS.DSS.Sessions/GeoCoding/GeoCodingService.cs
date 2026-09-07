@@ -1,5 +1,5 @@
-﻿using DFC.GeoCoding.Standard.AzureMaps.Model;
-using DFC.GeoCoding.Standard.AzureMaps.Service;
+﻿using DFC.GeoCoding.Standard.OrdnanceSurvey.Models;
+using DFC.GeoCoding.Standard.OrdnanceSurvey.Services;
 using Microsoft.Extensions.Logging;
 
 namespace NCS.DSS.Sessions.GeoCoding
@@ -7,25 +7,26 @@ namespace NCS.DSS.Sessions.GeoCoding
 
     public class GeoCodingService : IGeoCodingService
     {
-        private ILogger<GeoCodingService> _logger;
+        private readonly ILogger<GeoCodingService> _logger;
 
-        private readonly IAzureMapService _azureMapService;
+        private readonly IOSService _OSService;
 
-        public GeoCodingService(IAzureMapService azureMapService, ILogger<GeoCodingService> logger)
+        public GeoCodingService(IOSService OSService, ILogger<GeoCodingService> logger)
         {
             _logger = logger;
-            _azureMapService = azureMapService;
+            _OSService = OSService;
         }
 
         public async Task<Position> GetPositionForPostcodeAsync(string postcode)
         {
-            if (string.IsNullOrEmpty(postcode))
+            if (!string.IsNullOrEmpty(postcode))
             {
-                _logger.LogInformation($"GeoCodingService {postcode} is returning null");
-                return null;
+                return await _OSService.GetPositionForPostcodeAsync(postcode);
             }
 
-            return await _azureMapService.GetPositionForAddress(postcode);
+            _logger.LogInformation("Ordnance Survey Service is retuning null for postcode: {Postcode}", postcode);
+            return null;
+
         }
     }
 }
